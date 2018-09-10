@@ -1,0 +1,12 @@
+{
+    "file_name": "long_action_failsafe",
+    "title": "Long Handler Timeouts",
+    "intro": "The failsafe mechanic for long actions",
+    "revised": "2013-07-07 04:39",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "hive_mvc",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

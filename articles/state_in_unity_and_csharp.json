@@ -1,0 +1,12 @@
+{
+    "file_name": "state_in_unity_and_csharp",
+    "title": "Tracking State in Unity with C#",
+    "intro": "The property and enum systems in C# make an excellent ad hoc state system",
+    "revised": "2014-08-14 07:25",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

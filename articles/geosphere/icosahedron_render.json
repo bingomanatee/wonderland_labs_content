@@ -1,0 +1,12 @@
+{
+    "file_name": "icosahedron_render",
+    "title": "Icosahedron-render",
+    "intro": "Rendering Icosahedron data in Canvas form",
+    "revised": "2013-08-29 03:26",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

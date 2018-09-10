@@ -1,0 +1,27 @@
+Templating is an activity that people seem to get very "Magical" about. Templating is the process of producing a string that varies based on output that is either (a) inserted into the DOM (in the client side context) or (b) returned from an HTTP request (in the server side [node.js, rails, REST] context. 
+
+How you go about templating varies a lot -- there are of course many, many ways to produce a template. 
+
+## Functional Templates vs. OOP "Template objects"
+
+A functional template is a function that you put input into and get a string out of. it is (as a rule) *(idempotent)[http://en.wikipedia.org/wiki/Idempotence]* -- that is, for a given set of input it returns the same output. &ast;
+
+A template object is an OOP structure that you add data to both while constructed and over the course of executing your app, as you get more information from logic branches, databases, etc. 
+
+It has a method that you use to extract strings from, but you may call this method more than once as you iterate over data, change values, etc. 
+
+## Implicit templates vs. file templates
+
+Some template systems inject the template in code, while others leave the template as a file (that other code injects). Most MVC systems, Rails, Express views, etc. use this practice. The theory is that it makes it easier for designers to work with your environment. (the reality is, many designers are pretty freaked out at anything with variables in it. )
+
+It is also considered good "separation of concerns" to have separate template files. 
+
+## Custom scripting vs. native scripting
+
+This is the single biggest question in any templating system -- does it allow you to use whatever language you are coding in or does it have its own "Micro language". In my experience, custom/DSL languages of templating systems are the most frustrating element in working with a templating system. Creating a language is a very complex task that implies you have predicted all future control uses of anyone that uses the system and provided structures that satisfy them. 
+
+As an example of a templating system that allows native constructs, EJS (the javascript equivalent of Ruby's ERB) allows full embedded javascript. 
+
+----------
+
+&ast; (with allowances for things like use of the Date() to render time/date data...)

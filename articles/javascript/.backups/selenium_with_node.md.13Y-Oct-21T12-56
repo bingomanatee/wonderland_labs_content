@@ -1,0 +1,289 @@
+about as good as you’d expect
+
+## You can Selenium
+
+Running Selenium tests in node can be done with ANY client side app/web page. Selenium is a web service typically running on a local / desktop server that operates your browser, simulating user actions (clicks, text / form entries, etc.). It works with Chrome, Firefox, and IE. 
+
+## It is pretty easy to get started
+
+You can use any (tap, mocha, assert) module you want to run Selenium. In Node, Selenium is accessed by a module `wd` (WebDriver) that sends and receives signals to a running instance of the Selenium server. This in turn opens an actual web broswer and operates it, "Puppeting" use commands. 
+
+## Why Selenium?
+
+Selenium has a lot of things going for it.
+
+1. tests real code (for reals) against real browsers (super serial!) 
+2. has minimal intrusion on the local JS environment
+3. can test any site - local, staging, live, someone else’s
+
+Many other competitors exist but use "Virtual browsers". These browsers may or may not express bugs and flaws that real browsers exhibit. With Selenium, you have a fair amount of confidence that if Selenium can get things done with your UI, so can your users. 
+
+## A Sample Selenium Test
+
+The test below uses the TAP test protocol to manage a set of tests, operating a remote site (hosted on Heroku). 
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var tap = require('tap');
+var wd = require('wd');
+var utils = require('./lib/utils');
+
+tap.test('navigation', {timeout: 1000 * 200, skip: false }, function (suite) {
+
+    suite.test('home page', {timeout: 1000 * 100, skip: false }, function (hp_test) {
+        var browser = wd.remote();
+
+        function _abort(err) {
+            browser.quit(function () {
+                if (err) {
+                    console.log('error: ', err);
+                    hp_test.error(err);
+                }
+                hp_test.end();
+            });
+        }
+
+        browser.init({
+            browserName: 'chrome', tags: ["examples"], name: "navigation"
+        }, function () {
+            browser.get("http://passive-agressive-1248.herokuapp.com/", function () {
+                setTimeout(function () {
+                    browser.title(function (err, title) {
+                        console.log('result of title: %s, %s', err, title);
+                        hp_test.equal(title, 'Passive Aggressive 1248', 'title is equal');
+
+                        utils.visible(browser, 'button.all-locations')
+                            .then(function (visible) {
+                                hp_test.ok(!visible, 'all locations button is not yet visible')
+                            }, _abort)
+                            .then(function () {
+                                return utils.visible(browser, 'button.portlandor')
+                            })
+                            .then(function (visible) {
+                                hp_test.ok(visible, 'Portland button is visible');
+                            }, _abort)
+                            .then(function () {
+                                return utils.visible(browser, 'button.nyc')
+                            })
+                            .then(function (visible2) {
+                                hp_test.ok(visible2, 'New York button is visible');
+                            }, _abort)
+                            .then(function () {
+                                return  utils.click(browser, 'button.portlandor')
+                            })
+                            .then(function () {
+                                return  utils.visible(browser, 'button.nyc');
+                            }, _abort)
+                            .then(function (visible3) {
+                                hp_test.ok(!visible3, 'NY button no longoer visible');
+                            }, _abort)
+                            .then(function () {
+                                return  utils.visible(browser, 'button.all-locations')
+                            })
+                            .then(function (visible) {
+                                hp_test.ok(visible, 'all locations button is now visible')
+                            }, _abort)
+                            .then(function () {
+                                return  utils.click(browser, 'button.all-locations')
+                            })
+                            .then(function (visible4) {
+                                hp_test.ok(!visible4, 'New York button is not visible finally');
+                            }, _abort)
+                            .then(function () {
+                                browser.quit(function () {
+                                    hp_test.end();
+                                });
+                            })
+                    });
+                }, 3000); // give Angular some time to format template
+            });
+        });
+    });
+
+    suite.test('get movies', {timeout: 1000 * 100, skip: false }, function (movie_test) {
+
+        var browser = wd.remote();
+
+        function _abort(err) {
+            browser.quit(function () {
+                if (err) {
+                    movie_test.error(err);
+                }
+                movie_test.end();
+            });
+        }
+
+        browser.init({
+            browserName: 'chrome', tags: ["examples"], name: "navigation"
+        }, function () {
+            browser.get("http://passive-agressive-1248.herokuapp.com/", function () {
+                setTimeout(function () {
+                    utils.visible(browser, 'button.all-locations')
+                        .then(function (visible) {
+                            movie_test.ok(!visible, 'all locations button is not yet visible')
+                        }, _abort)
+                        .then(function () {
+                            return utils.visible(browser, 'button.portlandor')
+                        })
+                        .then(function (visible) {
+                            movie_test.ok(visible, 'Portland button is visible');
+                        }, _abort)
+                        .then(function () {
+                            return  utils.click(browser, 'button.portlandor')
+                        })
+                        .then(function () {
+                            return  utils.click(browser, 'button.event-movie')
+                        })
+                        .then(function () {
+                            setTimeout(function () {
+                                var css = '#paEventsCtrl h1';
+                                utils.getText(browser, css)
+                                    .then(function (text) {
+                                        movie_test.equal(text, 'Movies in zip Portland, OR', 'found event view title');
+                                        _abort();
+                                    }, _abort);
+
+                            }, 4000);
+                        });
+                }, 3000);
+            });
+        });
+    });
+
+    suite.end();
+
+});
+
+```
+
+They use a utility library that wraps a series of low-level commands into higher level utility functions
+
+## Selenium/node can get messy
+
+Selenium can be a rough user experience. Among its many issues, in Node, are:
+
+* **Nested Callbacks**: a general problem with Node, can get especially messy with `wd`, due to extended pipeline of calls. 
+* **Many steps to a single result**: Its rare to get what you want from a single call to `wd`; generally you have to do a series of calls to get a single unit of information. 
+* **Throws errors like a good metaphor**: Because you are very much "Probing in the dark" there are a lot of chances to talk off the pier  due to missing elements, long load times, slow javascript on the client, etc. 
+Repeated boilerplate tasks
+* **Difficult to understand what a test is testing for and why**: Even if you have the fortune to write a functioning test, its not always easy to read a test later on and understand what is going on. 
+
+## De-nesting callbacks
+
+One good way to make more readable/maintainable code is to use Promise to linearize the execution of `wd` methods. The `q` (queue) library is a popular implementation of promises in Node. 
+
+The basic premise is that if you return a promise at the end of an  asynchronous code, you can write procedures that wait for the async call to finish before executing their `.then` call(see above). 
+
+## Making reusable, easy to read utility functions
+
+Its worth your while to write “wrapper functions” that reduce “surface area” of your tests. 
+
+## Error Prone
+
+Its very easy to write code that throws/returns errors using Selenium. Asking for elements that aren't yet/still on the page is a classic way to do this. Catch the errors at every step and decide whether you really want to pass out the error or whether it is a usable result. 
+
+Generally speaking, `wd` throws errors unless its expectations are perfectly satisfied. 
+
+Generally speaking, you don't throw errors just because a test condition is not met; that's up to your testing framework to work out. So in your handling calls, you will often want to return a result (if just null/false) even if `wd` throws an error. 
+
+### Sample case: visibility test
+
+A classic browser test is to determine if an element is visible. The definition of "not visible" is generally speaking, expansive; that is, if the element is missing, that is a valid, non-error, definition of "not visible". So in writing a visibility handler, you will want to trap most errors and return true or false in nearly all situations: 
+
+``` javascript
+
+var utils = {
+  visible: function (browser, selector, timeout, done) {
+        if (_.isFunction(timeout)) {
+            done = timeout;
+            timeout = 0;
+        }
+
+        if (!timeout) {
+            timeout = 0;
+        }
+
+        if (done && _.isFunction(done)) {
+            browser.waitForElementByCssSelector(selector, timeout, function () {
+                browser.elementByCssIfExists(selector, function (err, element) {
+                    if (err) {
+                        done(null, false); // redirect 1 - returning false instead of an error. 
+                    } else if (element) {
+                        browser.isVisible(element, done); 
+                    } else {
+                        done(null, false); // redirect 2 -- returning false if the element is missing
+                    }
+                });
+            });
+        } else {
+            var deferred = Q.defer();
+
+            browser.waitForElementByCssSelector(selector, timeout, function () {
+                browser.elementByCssSelectorIfExists(selector, function (err, element) {
+                    if (_DEBUG)  console.log('visible.elementByCssIfExists %s result: %s, %s', selector, err, util.inspect(element));
+                    if (err) {
+                        deferred.resolve(false);
+                    } else if (typeof element == 'object') {
+                        browser.isVisible(element, function (err, visible) {
+                            if (err) {
+                                deferred.resolve(false); // redirect 1a - returning false instead of an error
+                            } else {
+                                deferred.resolve(visible);
+                            }
+                        })
+                    } else {
+                        deferred.resolve(false); // redirect 2a - returning false if element is missing
+                    }
+                });
+
+            });
+
+            return deferred.promise;
+        }
+    },
+}
+
+```
+
+## Testing Practices
+
+There is a lot of considerations when testing your client side interfaces. Primary amongst them, the necessity to control input data. 
+
+Normal sites' data is chaotic and transitive: it is a blend of 
+
+* backend / database / REST data
+* social data
+* widgets
+* third party fields
+* environmental data -- the current time, user identity, etc.
+
+While you can "test around" these variables, controlling as many of these variables as possible increases your ability to test your interface. 
+
+The decision then becomes, HOW do you channel your data through controllable sources. 
+
+Always encapsulate time
+Mark up your elements semantically
+
+Interception of data
+There are many ways to ensure your data is provided by a test scenario
+force feed data through Javascript
+Create a proxy and serve up recorded data
+Create a flexible back end
+Give up and just examine the data
+
+How to Decide?
+Do you want to run multiple tests concurrently
+Do you want to run tests on a local, shared, or live server
+Do you want to test indirect use of your data (say server side canvas graphs)
+Do you rely on remote services (Google Maps, etc.)
+Time
+If you use native time methods (new Date()) directly you lose the ability to simulate a time based scenario
+use custom “Time Providers” on server and client
+Things get real
+Third Party Data Services
+Hidden resource references (URLs in markdown, hrefs in DB)
+Third party widgets

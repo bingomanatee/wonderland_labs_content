@@ -1,0 +1,17 @@
+{
+    "file_name": "state_stack",
+    "title": "state_statck",
+    "intro": "The state stack reflects how much of your current energy you put into offense and defense",
+    "revised": "2015-04-01 11:10",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "suits",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

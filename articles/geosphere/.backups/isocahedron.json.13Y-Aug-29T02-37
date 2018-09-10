@@ -1,0 +1,12 @@
+{
+    "file_name": "isocahedron",
+    "title": "Isocahedron module cluster",
+    "intro": "The cluster of modules around icosphere management",
+    "revised": "2013-08-29 02:37",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": true,
+    "folder_homepage_weight": 0
+}

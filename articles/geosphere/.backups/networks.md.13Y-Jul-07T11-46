@@ -1,0 +1,15 @@
+A network of points is a collection of ?[Vertices](vertices) that represent a specific resolution. The vertices are decorated into nodes which have connections to neighboring nodes, and other use-specific data. 
+
+To generate networks from planets, execute the following code: 
+
+#### generating networks
+
+``` javascript
+
+planet = new Planet();
+planet.init_iso(2);
+var network_0 = new Network(planet, 0);
+var network_1 = new Network(planet, 1);
+var network_2 = new Network(planet, 2);
+
+```

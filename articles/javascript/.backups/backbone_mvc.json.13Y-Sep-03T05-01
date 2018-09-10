@@ -1,0 +1,12 @@
+{
+    "file_name": "backbone_mvc",
+    "title": "Backbone and Controllers: where's the beef?",
+    "intro": "Backbone doesn't have controllers, which leaves the question of where to put the meat of the app.",
+    "revised": "2013-09-03 05:01",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "javascript",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

@@ -1,0 +1,81 @@
+<a href="https://github.com/bingomanatee/hivemvc"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+
+![hive_mvc_cover_600.png](/blog_image/hive_mvc_cover_600.png)
+
+Hive MVC is a robust, scalable Node site framework.
+
+Some of the specific advanatages of Hive MVC include:
+
+  * A strong middleware pattern that lets you focus on business concerns.
+  * The ability to create reusable ?[resources](resources) for common tasks.
+  * A strong focus on action-centric coding over long sprawling contorllers
+  * A flexible project heirarchy of resources that allow for simple, short projets as well as large multi-tiered ones.
+
+It is designed around switchable building blocks including 
+
+* ?[view pipes](view_helpers) to add functionality between the action and the template. 
+* self contained ?[action folders](actions) with their own collection of static/client side files
+* Individual route ?[action scripts](action_scripts) with their own ?[routing configuration files](actions)
+* Action scripts that are designed for ?[testability](testing_actions) with or without an HTTP connection
+* ?[Phase-based action scripts](action_scripts) that partition execution to minimize callback confustion
+* A series of independent support ?[resources](resources) for memory resident models, boostrap/loading and view helpers
+* Easy integration with existing Express site ?[bootrstap](bootstrapping) scripts
+
+Built on Express, and designed to integrate with existing Express.js sites, Hive MVC brings the organizational concepts of mature frameworks like Zend and Ruby to the extensible and accessible style of Node applications.
+
+## Why Another Web Framework?
+
+There are several impetus' behind the creation of Hive-MVC
+
+1. To create a **file driven MVC** where the file structure clearly explains and defines the nature of the application. This is a pattern well met by previous MVC apps like Zend Framework and Ruby on Rails but hasn't been picked up as much by Express.js
+2. To create a very (**?[action centric system](actions)** wherein the action folder contains all the unique resources necessary to serve its URL endpoints, both on the client and the server level. Modern applications have a very deep pipe between client side resources and server side providers that aren't well represented by balkanizing files by type. 
+3. To create a set of **(?[exchangeable solutions](hives_and_frames)) that can contain finished, encapsulated, reusable components for things like layouts, blogs, forums, etc. Modules are a good way to create code libraries, but not so good at creating encapsulated client/server solutions.
+4. To create a **strong structure** for sites that can grow to production scale while still being granular and easy to edit and maintain at the tactical level, including things like 
+* ?[failsafe timeouts](timeouts) 
+* automatic ?[process logging](logging) 
+* javascript client side aggregation
+5. To ensure that the **?[actions are testable](testing_actions)** with or without HTTP interaction. 
+
+## Structural inspirations
+
+The three "Design seeds" for Hive MVC are Zend Framework, Ruby, and Drupal. 
+
+* I like Zend Frameworks very strong organizational series of modules and frameworks and its "Resource pool" sandbox model. The fact that file organization describes application anatomy. 
+* I like Ruby's emphasis on REST friendliness and easily pluggable resources; but ?[Hive-MVC is **not Ruby**](not_ruby).
+* I like the "Shareware" Drupal Module approach wherein each module blends its contributions into the whole design of the site. 
+
+I wanted to use Node as the basis for this because it has the most performant set of tools and really respects modern programming concerns. Node's standard for web projects is Express, and Hive-MVC builds on top of an Express website.
+
+Express -- as far as it goes -- is adequate for projets up to a certain scale. However as projects increase to the scale of a production website, managing resources for its components, routes, and static files are stored in three top-level folders for scripts, views, and static resources. This is a classic MVC pattern, and one I am trying to improve in Hive MVC by collecting these resources into ?[action-centric folders](actions)
+
+### Centralizing resources around solutions
+
+Hive MVC is designed to allow for both central organization of actions, and distribution of responsibility through functional files. There is no reason for the script for a given action to be stored in one bin and its template to be scattered elsewhere, with the static files relevant to the action (images, client side javascript) in yet another folder. 
+
+Also, there has not been a substantial effort to group the server and client side resources about a given action into a singe package. 
+
+### Splitting actions into tiers of functionality
+
+The callback centric nature of Node solutions begs for a more organized tier of methods; having a single function for an action is disingenuous when any dynamic activity within node nests at least two or three functions in tiers. 
+
+The Hive-MVC ?[action script methods](action_scripts) reduces the complexity of tiered callbacks becomes more manageable when you have semantically distinct pipes to work within. Having specific tiers to code within,
+
+* Validation (of required request parameters, ACL, etc.)
+* Input (from database, files, and request)
+* Processing (output from request to database, and file)
+* Output (any final cleanup necessary to prepare data for request)
+
+allows for callbacks to be better organized into semantically distinct tiers. They are managed through the async.waterfall pattern to provide a concrete compartmentalization of  callbacks into named, ordered tiers. 
+
+### A rich suite of supportive ?[resources](resources).
+
+Hive provides several hooks for resources to extend and support large scale development:
+
+* Mixins that trigger on bootup to extend, synchronize and modify site behavior.
+* Models to communicate with outside resources
+* View helpers that add consistent post processing to all actions, or a subset of actions based on a functional test of state
+* Post-render view helpers to filter the entire HTML output block as text. 
+
+### Providing a consistent layer of logging and integrity
+
+Node applications have a consistent challenge of un-terminating async processes and process failures; Hive MVC provides a layer of ?[timeout failsafes](long_action_failsafe) and ?[logging](logging) that make these problems easier to protect against and analyze.

@@ -1,0 +1,143 @@
+<style>
+        table.weaponTable {
+            border: 1px solid black;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+width: 100%;
+        }
+
+        .weaponTable td, .weaponTable th {
+            padding: 0.5em;
+            margin: 0;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .weaponTable th {
+            background-color: rgb(225, 225, 230);
+            font-weight: normal;
+            vertical-align: bottom;
+        }
+
+        .weaponTable .name {
+            width: 14em;
+        }
+
+        .weaponTable .number {
+            width: 1.5em;
+            text-align: right;
+        }
+
+        .weaponTable .notes {
+            width: 8em;
+            text-align: left;
+        }
+
+    </style>
+
+Armor has two important stats; defense, which increases your chance to avoid damage due to a glancing blow, and damage absorption that reduces the kinetic value of damage. These values are for hand to hand/weapon attacks; reduce damage absorption is halved vs modern gunfire.
+
+Other common material modifiers: 
+
+* Stone weapons: mail is +1 vs. stone weapons; plate is +2. 
+* Bronze: Steel plate and mail is +1 vs. bronze weapons; bronze plate is -1 vs. steel weapons
+
+<table class="weaponTable" cellpadding="0" border="0" cellspacing="0" style="width: 50%">
+<thead>
+<tr>
+<th class="name">Name
+<th>Damage <br />Absorption
+<th>Damage <br />Dispersion
+<th>Deflection<br />(Defense)
+<th>Kg
+<th class="notes">Notes</tr>
+</thead>
+<tbody>
+<tr>
+<td class="name">Light Leather
+<td>0
+<td>1
+<td>0
+<td>2
+<td></tr>
+<tr>
+<td class="name">Boiled Leather
+<td>1
+<td>1
+<td>0
+<td>5
+<td></tr>
+<tr>
+<td class="name">Studded Leather
+<td>1
+<td>1
+<td>1
+<td>7
+<td></tr>
+<tr>
+<td class="name">Fur
+<td>0
+<td>2
+<td>0
+<td>9
+<td></tr>
+<tr>
+<td class="name">Light Mail
+<td>1
+<td>2
+<td>1
+<td>10
+<td class="notes">1/0/0 vs. Penetration 2 weapons
+</tr>
+<tr>
+<td class="name">Heavy Mail
+<td>2
+<td>2
+<td>1
+<td>12
+<td class="notes">2/0/0 vs. Penetration 2 weapons
+</tr>
+<tr>
+<td class="name">Lacquered Armor
+<td>2
+<td>2
+<td>2
+<td>15
+<td class="notes">Made of bone/wood with some bronze reinforcement</tr>
+<tr>
+<td class="name">Segmented Plate
+<td>4
+<td>2
+<td>2
+<td>18
+<td class="notes">Equals light mail from the rear. 5/1 vs. pen 2 weapons  </tr>
+<tr>
+<td class="name">Medium Plate
+<td>5
+<td>3
+<td>3
+<td>21
+<td class="notes">Equals heavy mail from the rear</tr>
+<tr>
+<td class="name">Heavy Plate
+<td>6
+<td>3
+<td>3
+<td class>26
+<td class="notes">Equals Segmented Plate from the rear</tr>
+</tbody>
+</table>
+
+Armor has three benefits: 
+
+* Hard armor **Absorbs** damage well completely insulating a portion of incoming damage
+* Soft armor **Disperses** damage -- you still feel the kinetic energy but it converts focused killing kinetic energy to dispersed stunning energy.
+* Thick armor **Deflects** attacks causing glancing blows to be more likely to be redirected and not effect the target; this is a defensive bonus to the users attempt to dodge/block incoming attacks. 
+
+### Notes
+
+* Leather and fur is common wear for pre-bronze age cultures. 
+  * **Boiled Leather** is thick, hard and tough.
+  * **Studded leather** is reinforced with bone and/or metal studs and rings. The studs are not heavy or frequent enough to qualify as lacquered or mail, but enough to deflect some glancing blows. 
+* **Mail** is a flexible metal shirt of tiny metal rings, worn over medium leather and padding. 
+* **Lacquered Armor** is made of hard material -- wood, bone, even lacquered paper. Common in Asia for light troops. 
+* **Plate** is classic dark ages armor of the elite class of European soldiers.

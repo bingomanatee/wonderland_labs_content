@@ -1,0 +1,3 @@
+I have recently fallen afoul of the React/Flux paradigm in an experiment involving logins, social data and Firebase, build on React (Specifically the (React Starter Kit)[https://github.com/kriasoft/react-starter-kit]). 
+
+The lifeCycle (bootup) methods of React components are twitchy about exactly when you can and cannot use setState to initialize your state. Worse, all the docs on React use factory based classes while I'm opting for es6 based class structures (i.e., actual classes) because I find them more readable.

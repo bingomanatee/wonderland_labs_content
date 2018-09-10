@@ -1,0 +1,104 @@
+[Gate](https://github.com/nakamura-to/gate) is an invaluable module for handling asynchronous delay. Say you want to execute an action after you open and read a series of files. 
+
+Gate makes this very painless:
+
+``` javascript
+
+var Gate = require('gate');
+var fs = require('fs');
+
+var my_gate = Gate.create();
+
+function my_file_processor(filename, content, done){ .... 
+  // do file processing
+  done();
+}
+
+process.argv.slice(2).forEach(function (filename) {
+   var latch = my_gate.latch(); // returns a functional callback
+
+    fs.readFile(filename, 'utf8', function(err, content){
+        if (!err){
+           my_file_processor(filename, content, latch);
+         } else { latch(); }
+    });
+});
+
+gate.await(function(){
+   console.log('FILES PROCESSED');
+});
+
+``` 
+
+Note, we don't need to have all the work to be done ready or accounted for at once. The only predicate is that the `latch()` function must be called before the `await(fn)` call is made. 
+
+If for instance we called latch inside an async callback, 
+
+``` javascript
+
+process.argv.slice(2).forEach(function (filename) {
+
+    fs.readFile(filename, 'utf8', function(err, content){
+        // this async action will occur in a later event pass and so, 
+        // chronologically after the gate.await is called.
+        if (!err){
+           my_file_processor(filename, content, my_gate.latch());
+         } else { my_gate.latch(); }
+    });
+});
+
+```
+
+then from the linear processing point of view, no `latch()` calls would have been made before the async call and the termination function would be called directly. 
+
+## Asynchronous latches
+
+You can call latches inside an async function as long as you have a guarantee at that point that not all latches have been closed: 
+
+
+``` javascript
+/** ********* 
+* reading a series of directories
+*/
+
+var Gate = require('gate');
+var fs = require('fs');
+var path = require('path');
+
+var my_gate = Gate.create();
+
+function dir_processor(err, dirname, files, done){
+   files.forEach(function(file){
+      my_file_processor(path.resolve(dirname, file), gate.latch());
+   });
+   done();
+}
+
+function my_file_processor(filename, done){ .... 
+  // do file processing
+  done();
+}
+
+process.argv.slice(2).forEach(function (dirname) {
+   var latch = my_gate.latch(); // returns a functional callback
+
+   fs.readDir(dirname, function(err, files){
+      dir_processor(err, dirname, files, latch);
+   });
+});
+
+gate.await(function(){
+   console.log('FILES PROCESSED');
+});
+
+``` 
+
+Because we "kick the can" forward within `dir_processor(..)` before calling the latch passed down through it by the main forEach loop, we can be guarantee that the "gate stays open" for each file that we intend to process.
+
+## Are you sure `async` doesn't do this?
+
+Here is a quick rundown on the easy analogs in `async` and why they don't apply.
+
+* `series` and `parallel` require you to know all the work to do before you start crunching. `Gate` allows you to add extra work at any point, even after asynchronous tasks have been started.
+* `queue` has a single function responding to multiple arguments; `gate` lets you do any function you want. 
+* `doUntil` is as close as it gets -- if you had an incrementer/decrementer, you could use it + doUntil do do what `gate` does.

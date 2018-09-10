@@ -1,0 +1,15 @@
+{
+    "file_name": "hive_model",
+    "title": "Hive-Model",
+    "intro": "a memory model; a handy tool for simple record processing",
+    "revised": "2013-07-04 11:38",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "hive",
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

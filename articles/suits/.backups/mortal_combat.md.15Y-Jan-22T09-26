@@ -1,0 +1,122 @@
+Due to the finality of combat, there are specific rules for dealing with it that override the basic contest rules. 
+
+Mortal combat has more specific rules regarding initiative.
+
+## Stamina
+
+Each character in combat gets a deck of three cards that represent their current stamina. These cards may be played at any point instead of drawing a card. At no point can your stamina exceed three cards; when it does you may choose a card to discard from your hand. 
+
+## Rounds
+
+On the first round (or, the first round a character enters combat) you can place a card from your hand face down as your initiative marker. When all cards are placed, flip over the cards over. 
+
+If the card is below your movement rate, turn it sideways, to indicate you will act in the second phase.
+
+Characters act in descending order of their cards; then, those with sideways cards act in descending order. 
+
+In the event of a tie, act in order of suit: **heart**, **diamond**, **club**, **spade**. 
+
+Rounds represent about two seconds of real world time.
+
+### Actions
+
+In your turn you can do one of the following tasks:
+
+* **Attack**: choose an enemy character to target and attack
+* **Revive**: attempt to replenish your Will pool with a successful contest of your Will v. all accumulated damage
+* **Assist**: give one of your cards to an adjacent ally
+* **Windup/Ready**: prepare a weapon for use (See weapons tables for details)
+* **Move**: travel your full move. 
+* **Buff**: put a card aside to buff your next action
+* **Misc**: any other activity. 
+
+### Attacking: 
+
+Attacking a character is a contest of your offensive Speed versus your targets' defensive speed. 
+
+#### Damage
+
+If you win, your margin of success (min 1) scaled by the power ratio of your weapons' Power over your targets' defensive power (Body + Armor). round up at 0.5+. 
+
+For example: if you hit your target by drawing a 5, and your skill is 8, the margin of success is 3. If your Power with that weapon is 7 and their body is 4; you will do 3 * (7/4) = 5.25, rounded to 5, points of damage to your target.
+
+Draw one card for every point of damage you do. If you do more than four points of damage, the fourth card affects multiple points of damage. 
+
+* Every red card reduces your targets' Body pool by one. (Injury)
+* Every black card reduces your targets' Will pool by one. (Shock)
+
+**Optional: Penetration**
+
+Penetration reflects the fact that some weapons are better at producing internal damage than others. The difference between your weapons' penetration and the targets' anti-penetration value, in combination with the suit and value of the card, determines whether each card produces injury or shock. 
+
+As detailed in the table below, face cards (and aces) always determine the nature of the injury based on their color. Cards 2-9's effect varies with net penetration
+
+```
+     Red     Heart  Diamond Spade   Club    Black
+     JQKA                                   JQKA
++2  Injury  Injury  Injury  Injury  Injury  Shock
++1  Injury  Injury  Injury  Injury  Shock   Shock
++0  Injury  Injury  Injury  Shock   Shock   Shock
+-1  Injury  Injury  Shock   Shock   Shock   Shock
+-2  Injury  Shock   Shock   Shock   Shock   Shock
+
+```
+
+The effects of Damage, and the nature of ranged weapons, is detailed on separate pages.
+
+** Optional: Stun **
+
+Stun is a one-round penalty based on damage taken that round. The damage cards that you draw are initially placed face up on the stack. Your next action receives a penalty equal to the number of faceup cards in your stack; flip those cards face down after your round. 
+
+The effects of Stun are identical for both Injury and Shock cards. 
+
+#### Mortal Combat Example
+
+A spearman with Attributes (Speed 4, Body 4, Will 2, Mind 3) and hand weapon skill +2 (6). His spear has Power 4, penetration 2.
+
+His opponent is a Maceman with Attributes(Speed 3, Body 5, Will 3, Mind 4); His hand weapon skill is +1(5). His mace has a power of 7, but Penetration 0. 
+
+both are wearing chainmail (Def 0, Body 2, Penetration -1).
+
+* The Spearman has three cards (Jack, 3, and 6).
+* The Maceman has three cards (5, 7, 7); only one of those cards is below his skill unfortunately. 
+
+### Initiative
+
+1. The Spearman opts to draw an initiative card from the deck and draws a 2; he places it face down as initiative
+2. The Maceman places his 7 face down as his initiative card. 
+3. When revealed the Maceman's card is above his initiative so he turns it sideways. This means the Spearman goes first as his 2 is below his skill. 
+
+### Round 1
+
+#### Spearman action
+
+1. The Spearman attacks the Maceman, playing a 3 face down. 
+2. The Maceman places his 5 face down as a defense. 
+3. The cards are revealed and the Maceman successfully parries the spearman. 
+
+#### Maceman action
+
+1. The Maceman's only card is a 7, so he decides to attack by drawing from the deck. He draws a Q (Value 2) and places it face down. 
+2. The Spearman places his six face down.
+3. The cards are revealed; the Spearman successfully parries the Maceman. 
+
+### Round 2
+
+#### Spearman action
+
+1.  The Spearman attacks again; he places his Jack (Value 2) face down.
+2.  The Maceman draws from the deck and unfortunately draws a seven.
+3.  When the cards are revealed the Maceman's 7 fails to block the Spearman.
+4.  The damage done is [6 - 2 = 4] * the power ratio(Spears' damage of 4 vs. Maceman's [Body of 5 + chainmail 2 = 7] 4 * 4 / 7 = 2.28, rounded down to 2. 
+5. The net penetration is 2(spear) -1(armor) = +1. 
+6. Two damage cards (4 of hearts, A of Hearts) are drawn - both Injury cards. A good hit but it will be a while before the Maceman takes enough damage to go down...
+7. Lastly, the Maceman flips over his damage card, reducing the shock done by the blow he took. 
+
+### Maceman action
+
+1. The Maceman has only one card, a 7; If the Spearman had any cards left it might be worthwhile tossing it away but to prompt the Spearman to play a card in defense from his deck, but seeing as the Spearman can't do that, he draws a card and prays. 
+2. He draws a King (value 3). Fortunately, even with two points of shock to deal with, this is just equal to his effective skill of (5 - 2). 
+3. The Spearman draws a card, getting a 2; This means the Maceman connects with one point(minimum) of damage. The power ratio is Mace Power 7 / (Spearman Body 4 + 2 for chainmail = 6) -- basically, 1. The spearman draws a Queen of Clubs, taking one point of Shock. 
+
+.. and so on...

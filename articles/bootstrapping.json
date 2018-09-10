@@ -1,0 +1,15 @@
+{
+    "file_name": "bootstrapping",
+    "title": "Bootstrapping Hive-MVC",
+    "intro": "How to integrate hive-mvc to your express stack",
+    "revised": "2013-07-05 02:34",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "",
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

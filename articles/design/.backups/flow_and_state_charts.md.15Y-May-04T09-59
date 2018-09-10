@@ -1,0 +1,23 @@
+Flowcharts and State Charts are graphs (in the sense of node/line or database relations) and as such, there is no "Right" way to design them. However, there are ways that better document the intended flow better than others. 
+
+![Consigner Inventory Estate Chart (1).png](/blog_image/Consigner Inventory Estate Chart (1).png)
+
+This is a flow diagram I recently did for work. There are a few choices I made that in my opinion improve readability and are good rules to follow when graphing flow. 
+
+## Always keep the main branch linear and vertical
+
+There is in general one main flow which is the median case scenario. 
+
+This main branch should be direct, linear and prominent. When possible keep it on the left edge, or if branching is significant, as a center axis. Forcing the user to take a twisting journey to follow the most common flow disguises the fact that it is the most common flow. 
+
+Even in the sub-states like Return, where there is a main flow, vertical paths are used to emphasize the direction of flow. 
+
+In the flow, where paths are two-way, the nodes are kept as horizontal peers. This too uses position as a storytelling tool. 
+
+## Highlight the sub-states of the chart with boxes or swimlines
+
+Generally, there will be at least one or two larger groupings of boxes within the flow. Document and call those groups out; they will add context to the story you are trying to tell. 
+
+## Replace "spider" branches with summary links
+
+All the states in this diagram in the received state can link to "Consigner Return Requested" or "Rejected". Rather than create a massive spiderweb of links, I created an abstract link between the received state to the consigner-return requested. Creating literal branches between all the nodes that are actually linked could have been done but it would have created a lot of visual weight and detracted from the basic flow of information.

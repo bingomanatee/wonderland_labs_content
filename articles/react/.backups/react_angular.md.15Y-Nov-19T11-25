@@ -1,0 +1,69 @@
+One of the areas I find most telling about frameworks in general and web frameworks in specific is the "WTF Index"; that is, how much of my time do I spend wondering why things I think should work aren't. And further, when I am boggled how much of the time do I spend not even knowing what component or line of code is causing the problem. 
+
+Neither Angular nor React is innocent of causing WTF moments. With angular it is usually in the form of "The Digest Cycle is eating its own ass; sucks to be you" where in react its in the form of "The Dom has been molested! Heaven forfend, I do believe I may faint!" And its usually just that specific. "We don't like the DOM." Not a particular DOM node, no that is TMI. Just the DOM in general. 
+
+Fair warning: I am talking herein about the Angular 1.4x branch I work on for a living rather than the 2.0 WIP because its a working system used in production. React is still kind of where Node was four years ago, in the rapid version we-might-break-things state, which is a necessary inconvenience; however its strength is well documented by the fact that adopters are willing to go along with the ride for the benefits of faster and easier development and rendering, and tools like React Native which simply have no analog in Angular (or other systems). 
+
+Admittedly, given that both frameworks will leave you beached, it is worthwhile noting that in my experience React manufactures far more unhelpful errors than Angular. Given its youth this is to be expected. In fact I'd say that while Angular is pretty good at letting you know what part of the code is screwy it often does so in the form of links to its documentation that contain metadata about the error. This technical debt of depending on a remote site to be up and accessible for your debug messages to work is pretty unhealthy; what about us sewer programmers who may not have the most reliable access to net connectivity? 
+
+## Testing my patience
+
+Another beef I have with both frameworks is that getting testing to work properly is not a slam dunk in either framework. And worse yet they both pretty much bully you into a single framework (Jest for React, Karma for Angular) to get your tests running. I'm fairly used to, as a JS / Node developer, having no restrictions on testing frameworks; I can use TAP (node tap, thanks to Isaac S., the NPM maintainer) or Mocha or Jasmine or even DIY if I want to. Going outside the lines in either Angular or React is a very dark and mysterious journey. 
+
+Further even if you try to toe the line both frameworks' unique architectures make testing fairly foreboding. There are terse examples of testing working with React and Jest, but I've yet to get anything to work well under Jest. One of the big problems is it auto-mocks nearly everything, and you have to actively whitelist code files to get them to load (instead of getting stubbed out); for deep dependencies this is a pain in the ass. 
+
+Angular makes testing suck with a very particular injection model. 
+
+My "A pox on both your houses" attitude is rooted in how easy node modules, by contrast, are to test. 
+When you pull a node module into a test scenario, you basically auto-load all its dependencies and you generally have near perfect control over your test subjects' environment. It is true that mocking and stubbing related dependencies is basically a non-starter but if your own code uses injection you can usually make that happen in short order. 
+
+So while neither frameworks are stellar from the testability POV, to date I find I am actually able, with hours of research, to get Angular to test, while I'm still hitting massive dead ends with Jest. I don't think its a coincidence that the starter repos for React don't feature much (or any) test coverage on their sample code. 
+
+## Readability 
+
+Another frequent WTF roadblock is inheriting code that someone else (or you) wrote a while ago and not being able to understand or follow it. This usually breaks down into one of three areas:
+
+1. Mysterious resource referencing/linking
+2. Strange template design
+3. Difficult to follow dynamic coding
+
+### The templating
+
+I have to say one of the things that makes React standout is that its templating language is fundamentally solid. One reason is that its template language has zero logical constructs; its purely tag and one-way inserted values. If you do need template logic that logic is native JS, and is external to the templates themselves. it's very easy to inject larger structures from helper functions/methods.classes as in 
+
+``` javascript
+
+render() {
+  var rand = Math.random();
+  return (<div><div className="userPortrait">{ this.userPortrait() } {rand} </div>
+<h2>{ this.state.username }</div> ); 
+}
+```
+
+tracing the injected values, whether they are references to local variables, methods, properties, state or external helpers, is made very trackable because there is only one non-HTML style allowed in the template language: `{ native javascript }`. Angular's extra-functional tags and attributes often make for more difficult logic; and I say more difficult, not absolutely difficult, as its template language is for the most part well documented and easy to follow once you submerge yourself in its idiosyncrasies.
+
+The most fundamental differences in the approach to templating between the two languages is that React unifys its templating in a more functional manner inside its components while Angular relies for the most part on external templates. Either an use the opposite approach, but you kind of have to judge these systems based on the current best practice. And I have to give it to React in that its ability to let you write very terse partials and assemble them is far more efficient than Angular's verbose Directives. 
+
+## Change is good
+
+Really tricky problems in tracking logic usually involves the event system and pub/sub. React is much more direct when it comes to passing data around; it considers itself purely top down and functional. I'm not sure how well that holds up when individual components can read from and write to the Flux system of choice. However given that you DO have a choice of binding systems and can have much more direct control over the extent and timing of data cascades in React, 
+
+I think there are far more shades of grey in this arena than the React rebel alliance would have you think. ("We're not so different, Mr. Powers.") While the stock React system is very clean with synchronized one-way updates. any system of reasonable complexity is going to have cascading chains of updates and the threat of circular changes. The fact that those complications happen in third party software on the React side is kind of finger-pointing. At least in Angular they own the whole responsibility of data management including the difficulties that occur when dependency chains go bad. With React, the tempting system claims innocence when eventing problems occur because it isn't an eventing system.
+
+Also, while React is simple, its got a duality that makes simple less simple than it could be. Data flows downhill in parameters, AND is local in the component state. Having two sources of data with two different sets of rules seems unnecessarily dualistic. 
+
+On the plus side the update cycles in React are far more overt than Angular's mystical system of existential observation. This also means its a bit easier to debounce and bottleneck updates in React.
+
+## The Fault in Your Stars
+
+The fact that every component has/is itself a state belies the promise of rect that there is an angelic separation of concerns. In truth, state is injected into properties, which can be pulled into state at the children level, and can trigger HTTP requests/async updates, creating a fairly massive hive of data updates and cascading changes. This is often very good, but it is by no means in keeping with the press kit that claims that React has a pure and functional unidirectional system of update cycles. It does, IF you play by the unwritten rules, but you can just as easily create chaotic patterns of data management in React as you can in Angular or any other system. 
+
+Angular on the other hand claims to be clean and easy to manage by taking the observance cycle out of your hands and making updates existential and transparent. This is for simple scenarios good; but the problem is that immediately invites you to complicate those simple scenarios, and when you do the transparency begins to cloak performance issues that are mercurial and pernicious. And as has been well documented, Angular is not very "Grab and go". It requires a mastery of a complex interconnected system; while not necessarily all in one go, it is quite difficult to engage in a professional manner with Angular without really nailing the Directive which is one of the more complex UI paradigms I have ever seen. 
+
+## Legos 
+
+One minor note; both Angular and React use modules to organize their files. However React uses commonJS/es6 modules blending itself seamlessly with React and Bower far more gracefully than Angular. 
+
+## In Short
+
+React (version 1) is far more functional than Angular (version 1) and is competitive with Angular (version 1.5x) which is pretty significant. I don't think a well educated gentleman can afford to ignore either platform; both, once you accept the ground rules, allow very rapid development, and are capable of managing a production site. I will be better able to say in a few months whether the difficulties in React go away with experience or are long term issues.

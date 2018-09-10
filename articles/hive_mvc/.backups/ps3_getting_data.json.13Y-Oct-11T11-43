@@ -1,0 +1,17 @@
+{
+    "file_name": "ps3_getting_data",
+    "title": "Adding a model to proxying eventful",
+    "intro": "Our model is rapidly outgrowing a single function. Lets put it into its own resource",
+    "revised": "2013-10-11 11:43",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "hive_mvc",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "file_name": "redux_store",
+    "title": "Condensing Redux into a single container: Redux Store",
+    "intro": "An NPM module I wrote for Redux",
+    "revised": "2015-11-27 11:02",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "react",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

@@ -1,0 +1,151 @@
+I always found "Prototypical" to be a very complex and overly glorified way of describing what Javascript does with the class model. I thought I would give a stab at breaking down the basics of how and why Javascript does instantiation the way it does. 
+
+## The Conceptual Tree
+
+The logical leaps this article covers are, in short form:
+
+* Javascript objects are hashes
+* These hashes can contain statics, other objects, arrays, or functions. 
+* A hash function acts like an instance method, in that `this` refers to the hash itself.
+* Any JavaScript function when called with the `new fn()` form, returns an instance object.
+* it will have the function's prototype, which is a hash that contains defaults for the retuned object.
+* A functions' prototype behaves like a normal hash -- it can be defined, modified, and changed by name. 
+
+## Some fundamental but very important concepts
+
+### Objects are Hashes. 
+
+Seems simple enough but getting this is vital to getting anything real done with Javascript. A hash is a set of name-value pairs -- basically a labelled keychain. In a deeper sense it is also a __namespace__ -- that is, for the object variable, each *value* is called *name*. 
+
+``` javascript
+var fred = {wife: 'Wilma', kids: 1, male: true, says: ['hey boo boo', 'yabba dabba doo']};
+console.log('Freds is male: ', fred.male, ' and his wife is ', fred.wife) // true, wilma
+
+var barney = {wife: Betty', kids: 1, male: true, says: []}
+console.log('Barney is male:, barney.male, ' and his wife is ', barney.wife) // true, betty
+
+// lets give Barney a sex change
+barney.male = false;
+console.log('Barney is male:, barney.male, ' and his very upset wife is ', barney.wife) // false, betty
+```
+
+An object can be created with any number of properties, and you can add or delete properties at any time to any object. 
+
+``` javascript
+barney.hat = 'Fuzzy Blue Cap';
+delete fred.wife;
+```
+
+The javascript's engine's task of finding the value of an object by key is pretty readable here. You have set these values in creation, and as shown for poor Barney, you can change them by setting the dot-reference.
+
+## Self-awareness in object code
+
+Since objects can be passed around to different variables, put in arrays, etc., and object variables can be cleared out, the variable names are not permanently assigned to an object. For instance, 
+
+<iframe width="100%" height="300" src="http://jsfiddle.net/bingomanatee/Wrffv/embedded/js,result" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+<!--
+var cup_1 = {has_ball: true};
+var cup_2 = {has_ball: false};
+var cup_3 = {has_ball: false};
+
+console.log('has ball: cup_1: ', cup_1.has_ball, ',cup 2:', cup_2.has_ball, ',cup 3', cup_3.has_ball); // has ball: cup_1:  true ,cup 2: false ,cup 3 false 
+
+var swapper = cup_1;
+cup_1 = cup_2;
+cup_2 = cup_3;
+cup_3 = swapper;
+
+console.log('has ball: cup_1: ', cup_1.has_ball, ',cup 2:', cup_2.has_ball, ',cup 3', cup_3.has_ball); // has ball: cup_1:  false ,cup 2: false ,cup 3 true 
+
+cup_1.owner = 'cup_1';
+cup_2.owner = 'cup_2';
+cup_3.owner = 'cup_3';
+
+swapper = cup_1;
+cup_1 = cup_2;
+cup_2 = cup_3;
+cup_3 = swapper;
+
+console.log('owner: cup_1: ', cup_1.owner, ',cup 2:', cup_2.owner, ',cup 3', cup_3.owner); // owner: cup_1:  cup_2 ,cup 2: cup_3 ,cup 3 cup_1 
+-->
+
+As shown here, you can switch which variable refers to which object at will. The objects -- which have been re-mapped here -- will retain their assigned values. 
+
+However, if a function has been tacked onto an object, then it will always be able to refer to the host object it is assigned to using the keyword "*this". This simple handy utility is how OOP-like behavior - and a host of nasty side effects -- is accomplished. and THIS is why objects can be considered "Namespaces" of sorts.&apos;
+
+<iframe width="100%" height="300" src="http://jsfiddle.net/bingomanatee/ugu6E/embedded/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+This means that __fundamentally, you get "instance-like" behavior on any object in JavaScript without using the `new MyClass()` pattern.__ That is -- you can create a "pure object", assign properties and methods to it by name, and that object will ACT like a "Class instance."
+
+In practice, JavaScript "Constructors" and "Instances" are not distinct syntactic structures -- they are behaviors produced by using the `new` call on functions. 
+
+### The Prototype: default values for an instance
+
+The class-like behavior Javascript provides is a very simple concept that is often wrapped in very big language. 
+
+A prototype is simply a collection of "Default values" for an instance object if the instance object hasn't been assigned a unique value for given name. So if you find yourself getting dizzy with prototypical terminology, just remember that "Prototype" means "Default values". More deeply, a prototype is a hash of name/default values for all **instances** of a function. (more later). 
+
+Read that again, because it is simple, and its implications are deep. 
+
+* *Implication 1*: An object can have any number of properties -- which can be values, objects, functions, or whatever. an instance's manifest is not limited by its prototype/definition. 
+* *Implication 2*: there are no "private" properties on an object. "Privacy" is achieved by closure. 
+* *Implication 3*: There is no "Natural" deep inheritance - an object can only have (up to a) single parent.&apos;&apos;
+* *Implication 4*: You can if you want DIRECTLY MODIFY a prototype and magically spawn default values to instances after they have been created. this is a very "Time Traveller/Matrix like" thing -- you can change the reality for untold number of instances by rewriting their default values AT ANY TIME. 
+
+The prototype of an object is itself a hash. You can do anything to it that you can do to an object: 
+
+*example*
+
+## functions as constructors
+
+There is nothing you need to "Do" to a function to "turn it into" a constructor. Any function can be called with the `new` property. In fact, if you assign all properties and methods inside the constructor, you don't need to address/set the prototype at all: 
+
+*example*
+
+All functions have prototypes. You can set them by name. As mentioned before, you can set a function's prototype at any point. 
+
+*example*
+
+## In closing
+
+Javascript purists insist that JavaScript is "Not a classical language". While it is true that you will not find a discrete structure for defining a thing called a class, 
+
+## Some "Power user" tricks
+
+### String key association
+
+You have a larger set of tokens available when naming object keys than is apparent by reading the docs (casually.) 
+
+* You can assign ANY name you can make a string out of a value, by using array syntax:
+
+``` javascript
+
+var barney = {};
+barney['favorite outfit'] = 'Ballerina costume';
+console.log('barney likes to wear a ', barney['favorite outfit']); // Ballerina costume
+```
+
+You can even assign numeric key-value association. The map will be to a string of a number, but with array access, that shouldn't be a problem.
+
+``` javascript
+
+var bedrock_citizens = {};
+
+bedrock_citizen[0] = 'Fred';
+bedrock_citizen[1] = 'Barney';
+bedrock_citizen[2] = 'Wilma';
+bedrock_citizen[3] = 'Betty';
+
+console.log('bedrock citizens: ' bedrock_citizen[0], bedrock_citizen['1'] ... ) // 'Fred', 'Barney'...
+```
+
+This does NOT endow an object with the features of an Array but in some circumstances, it might be more useful.
+
+### Binding context 
+
+You can create the __effect__ of binding a function to an object using the `fn.call(context, a, b, c)` or `fn.apply(context, [a, b, c])` methods of the __function itself__. This will set `this = context` within the execution of the function. 
+
+------------------
+&apos; Note that `this`, when called on an unbound function, or in a root script, refers to the "Global" space, In client side JS, this is the window object. In node, it is the "implied closure" of the module. 
+
+&apos;&apos; You can "Mix in" as many sets of values after an object as been created, but this is no different than assigning values one by one.

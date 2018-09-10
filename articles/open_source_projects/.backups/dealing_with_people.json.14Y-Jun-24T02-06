@@ -1,0 +1,17 @@
+{
+    "file_name": "dealing_with_people",
+    "title": "Dealing with Other People: an Engineer's Guide",
+    "intro": "If you're like me its your least favorite part of the job. Here are a few things I have learned the hard way.",
+    "revised": "2014-06-24 02:06",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "open_source_projects",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

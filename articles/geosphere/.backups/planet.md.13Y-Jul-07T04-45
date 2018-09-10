@@ -1,0 +1,9 @@
+Planets are collections of points on a spherical representation of a world. 
+
+They have the following properties: 
+
+#### vertices [{Three.js Vector3}]
+
+An array of three.js Vector3 objects. each has a Vector2 coordinate at property `uv`. 
+
+#### Sectors

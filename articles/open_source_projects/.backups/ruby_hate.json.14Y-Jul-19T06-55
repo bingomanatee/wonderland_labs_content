@@ -1,0 +1,12 @@
+{
+    "file_name": "ruby_hate",
+    "title": "Why I Hate Ruby",
+    "intro": "Ruby is popular, open source, strongly supports test based development, best practices, and has a huge community of developers. And I hate it. Here's why.",
+    "revised": "2014-07-19 06:55",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "open_source_projects",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

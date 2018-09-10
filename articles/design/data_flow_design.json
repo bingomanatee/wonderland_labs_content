@@ -1,0 +1,16 @@
+{
+    "file_name": "data_flow_design",
+    "title": "Data Flow Design",
+    "revised": "2016-09-12 07:50",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "design",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

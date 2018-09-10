@@ -1,0 +1,124 @@
+Classes in es6 can be overridden and decorated. Its touchy but it opens a whole new world of mixins and decorators. 
+
+For instance I'm working on a set of validation classes that ensure bad data (strings for arrays, non-email addresses, etc.) can be easily recognized and flagged. I could use the validation instance's methods *inside* the set/get properties in other classes; but I want to *automatically* safeguard classes without having to rewrite line-by-line their properties. 
+
+So I created a method `insulate` in the Validation class. This takes a class definition in and alters any properties that 
+
+1. have the same name as the targets (parameters) the validator has rules for 
+2. have a `set` method.
+
+To understand this example, the validator class has a library property, that is an es6 `Map`. The keys in this map are the names of properties to protect; the values are `Rule` instances, which have `try(value)` methods that return `boolean` if the test succeeds (data is valid) and false if the test fails (data is invalid). 
+
+So to protect another class' properties from updating themselves with bad data I created an insulate method for the Validation class:
+
+```` javascript
+
+    for (let target of this.library.keys()) {
+      let propDescriptor = Object.getOwnPropertyDescriptor(classDef.prototype, target);
+      if (propDescriptor && propDescriptor.set) {
+````
+
+Here is the main magic; we are saving the function that *used* to update a property -- and we don't care how or what it does, only that it takes in a value -- to a variable, and replacing the set handler with a new function, one that requires the `rule.try` to pass before calling the inner `_oldSet` handler: 
+
+```` javsacript
+        ((target, descriptor, rule) => {
+
+          let _oldSet = descriptor.set;
+
+          descriptor.set = function (value) {
+            if (!rule.try(value)) {
+              if (errorHandler) {
+                errorHandler(target, value, this);
+              } else {
+                try {
+                  console.log(`bad property set ${target} to ${value}`)
+                } catch (err) {
+                  console.log('bad property set');
+                }
+              }
+            } else {
+              _oldSet.call(this, value);
+            }
+          };
+
+          Object.defineProperty(classDef.prototype, target, descriptor);
+        })(target, propDescriptor, this.library.get(target));
+      }
+    }
+
+````
+
+Here is the tests that show the validator's insulate in action:
+
+```` javascript
+
+      describe('insualate', () => {
+          let val, FormClass, errors;
+          const VALID_MAIL = 'foo@bar.com';
+          const NOT_MAIL = 'I am not an email address';
+          beforeEach(() => {
+            val = new Validator('permForm', {
+              'username,password,email': [TEST_STRING_NONEMPTY, (s) => s.length >= 3 && s.length <= 20],
+              'email': (s) => EMAIL_RE.test(s)
+            });
+
+            errors = [];
+
+            FormClass = class {
+              get email() {
+                return this._email || null;
+              }
+
+              set email(email_value) {
+                this._email = email_value;
+              }
+
+              get username() {
+                return this._username || null;
+              }
+
+              set username(username_value) {
+                this._username = username_value;
+              }
+
+              get password() {
+                return this._password || null;
+              }
+
+              set password(password_value) {
+                this._password = password_value;
+              }
+            };
+
+            val.insulate(FormClass, (p, v, target) => {
+              console.log(`failure to set bad value ${v} to property ${p}; current value is ${target[p]}`);
+              errors.push([p, v]);
+            });
+          });
+
+          it('should allow good values', () => {
+            let f = new FormClass();
+            f.email = VALID_MAIL;
+
+            expect(f.email).toEqual(VALID_MAIL);
+          });
+
+          it('should prevent bad values', () => {
+            let f = new FormClass();
+            f.email = VALID_MAIL;
+            f.email = 'I am not an email address';
+
+            expect(f.email).toEqual(VALID_MAIL);
+          });
+
+          it('should log failures', () => {
+            let f = new FormClass();
+            f.email = VALID_MAIL;
+            f.email = NOT_MAIL;
+
+            expect(errors).toEqual([['email', NOT_MAIL]]);
+          });
+        });
+      });
+
+````

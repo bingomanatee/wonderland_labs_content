@@ -1,0 +1,173 @@
+[BEM](https://en.bem.info/method/) is a set of principles in CSS design. On the face of it it is a naming convention for CSS but in practice it is a deeper set of principles about how and when you use names and what styles and css methodology you do and do not use. 
+
+## The Why of Fry
+
+Before describing the what a note on the why: 
+
+The premise here is that CSS rules that overlap obscure and frustrate developers on large teams and projects (and large teams with large projects). The chance for style definitions intended for one context spilling into another, and for frustrated developers to `!important;` -stamp their work just to force their desired outcomes. 
+
+consider this set of tags:
+
+```` html
+
+<html>
+  <section class="topnav">
+     <div id="welcome">
+       <h1>Welcome to <a href="/" class="header-link">Dinosaurs.com</a></h1>
+     </div>
+  ...
+   </section>
+</html>
+
+````
+
+How many ways can css affect the link? 
+
+```` css
+html h1 {color: red}
+h1.link {color.green}
+a {color: blue}
+#welcome {color: black}
+section a {color: orange}
+h1 {color: yellow}
+````
+
+This is a significant problem with CSS. All of these technically valid patterns of style designation logjam and when a problem is detected, backing out of it in a large site with many existing markup tags is a nightmare. [This article](http://www.vanseodesign.com/css/css-specificity-inheritance-cascaade/) describes how awesomely curious precedence is in CSS. 
+
+If you're curious click <a class="btn" target="_blank" href="https://jsfiddle.net/bingomanatee/je7t25rd/embedded/result/">Here</a>
+
+The beauty -- and danger -- of CSS is that it cascades. 
+
+## Local Ownership
+
+BEM attempts to fix that by doing CSS without cascading effects by funneling all CSS into element level tags in which 100% of the style for its target is contained in that (or those) class(es). I.e., 
+
+* No element level tags, whether global (`h1 {color:orange}`) or modifying (`h1{color: blue}`).
+* No multi-element rules (`h1 a{color: blue}`)
+* No id rules (which regardless, you should be observing anyway) (`#head {color: black)`)
+* No positional or content related tags (`.field[type="input"] { color: red }`)
+
+## The REM of BEM
+
+In place of that multitude, BEM has three simple classes of CSS tags, 
+
+1. **Block** tags, for overarching containers (`.article { font-size: 1.5rem }`)
+2. **Element** tags, applied inside said container (`.article__paragraph { margin-bottom: 1rem }`)
+3. **Modifier** tags, applied following element tags in special circumstances (`.article__paragraph--last { margin-bottom: 0 }`)
+
+From this we get the acronym **BEM**. 
+
+a few more notes:
+
+* Blocks can be inside other blocks
+* Modifier tags are only used as siblings of their base class
+
+## Sparkle Magic
+
+This does a great job of reducing the WTF factor of css. Once you get comfortable with long names its a very direct way of styling tags. 
+
+Then you get into side effects; mostly having to do with any legacy/third party css that does restyle elements or IDs or is in any other way not BEMmed. One typical example of this is form tags; its pretty common to restyle form tags based on the element name - such as having all `input[type=text]` elements to have a given visual style. 
+
+There aren't clear in-house answers to this other than 
+
+1. extinguish all competing element or attribute based styles
+2. compromise BEM by putting their styles under deeper hierarchies to give them more override weight
+3. Get very ugly with !important; in all BEM classes.
+
+Also once you start using BEM you will find that you are writing a lot more CSS classes as EVERYTHING has to be manually styled, not just containers. In fact I'd say BEM is nigh on unmaintainable without a dynamic mixin based system like SASS or LESS because of this. Because BEM is anti-cascading mandate, EVERY ELEMENT that you use BEM with must have a class. Many, more than one class. As of this writing its unclear whether heavier use of CSS has any performance problems. 
+
+That said, BEM does deliver on its promise of drastically neutralizing side effects. Its being used at [TheRealReal.com](http://www.therealreal.com) for our (pending) responsive pages and other ongoing work.
+
+## The Mid Trunk Dilemma
+
+We recently crafted a fairly deep page layout for TheRealReal and found there were some areas in which internal debate was fostered over how to structure elements.
+
+![page_layout.png](/blog_image/page_layout.png)
+
+note that element (5), the inner gutter is sometimes present, sometimes absent in different situations
+
+The fact that (1) is a Block and (5,6) are Elements are undisputed. The middle ground comes in blocks (2, 3, 4). Are they:
+
+1. Elements of 1
+2. Independent blocks
+3. A mixture of the two
+
+### Version 1: top down ownership
+
+The outlay for a fully top down ownership is:
+
+1. page-frame
+2. page-frame__main
+3. page-frame__gutter
+4. page-frame__content
+5. page-frame__content-gutter
+6. page-frame__content-main
+
+The advantage to this is that the overall hierarchy is more spelled out in the css name structure. The disadvantage is that the css and names are longer which can in practice reduce readability. 
+
+### Version 2: fully independent blocks
+
+1. page-frame
+2. main
+3. gutter
+4. content-frame
+5. content-frame__gutter
+6. content-frame__content
+
+The advantage here is clearer shorter names. A disadvantage is that you can end up using good names in one context that are not usable in other contexts. 
+
+### Version 3: A mixture of the two
+
+1. page-frame
+2. page-frame__main
+3. page-frame__gutter
+4. content-frame
+5. content-frame__main
+6. content-frame__gutter
+
+This defines understandable relationships at two levels, not just the "leaf node" level. 
+
+## Namespaced Prefixing
+
+Some clarity issues can be addressed with a namespace prefix. This ties the whole hierarchy together better. 
+
+### Version 1n: top down ownership
+
+The outlay for a fully top down ownership is:
+
+1. alpha-page-frame
+2. alpha-page-frame__main
+3. alpha-page-frame__gutter
+4. alpha-page-frame__content
+5. alpha-page-frame__content-gutter
+6. alpha-page-frame__content-main
+
+This is probably the least useful combination as the namespace does the work that page-frame is trying to do.
+
+### Version 2n: fully independent blocks
+
+1. alpha-page-frame
+2. alpha-main
+3. alpha-gutter
+4. alpha-content-frame
+5. alpha-content-frame__gutter
+6. alpha-content-frame__content
+
+This is one of the strongest uses of a namespace, allowing independent sub-names to exist under the namespace with only leaves acting as BEM Elements.  
+
+### Version 3n: A mixture of the two
+
+1. alpha-page-frame
+2. alpha-page-frame__main
+3. alpha-page-frame__gutter
+4. alpha-content-frame
+5. alpha-content-frame__main
+6. alpha-content-frame__gutter
+
+This gives a good mixture of Elements and Blocks as well. 
+
+## Closing 
+
+BEM is a very clear way to develop small tactical components like forms, dialogs, and search widgets. It removes the ambiguity that cascading styles creates. However in larger structures with more deep nesting there is a lot of grey area about how things should be named that BEM does not explicitly solve with its rule set.
+
+In house the lack of the "Battling Banjo" effect of cascading style is more valuable than the issues that using BEM has brought to our process.

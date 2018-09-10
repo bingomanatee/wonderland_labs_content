@@ -1,0 +1,23 @@
+As I circulate around the marketplace interviewing I've noticed that testing exists in this weird triple state. Those that adopt good testing practices are absolute in their conviction that it is immensely valuable to the process of development. Those that have not are convinced that adopting testing is so far beyond the ability of their team that it would sink them into a recursive spiral from which they would never emerge. 
+
+Testing -- or rather, the failure or success of those in charge of the engineering group -- is a great example of balancing outward pressures vs. inward pressures. A company has tremendous outward pressures from both the community that uses its services (the customers) and the people who have invested in it (the owners/investors). The amount of pressure the internal forces (engineering) can produce are relatively small in comparison unless the management of the engineering team has enough pull to establish testing; this means that they 
+
+1. Have pull with the backers to establish a practice that is not directly related to revenue -- or the ability to put some opacity around their processes
+2. Have the ability to inject practices in their team
+3. Have the conviction that there is enough value in testing to make it a continuing demand on the team, in competition with market forces.
+
+This usually doesn't happen until the manager and/or team has enough maturity to realize that code without test coverage is a ticking time bomb, one that inevitably goes off when you have the least amount of resources available to deal with it. 
+
+Silicon Valley is all about speed: speed of delivery, speed of performance, and speed of process. Speed is a great value to have especially for a small and ambitious startup. However there is another value that without which, speed is useless. *direction*. If you are running in the wrong direction, speed is irrelevant. 
+
+Testing is the one thing that gives good metrics to the structure of your code that you are heading in the right direction. It is also the only thing that gives your code the ability to be modified without fearing catastrophe. 
+
+Given that code is by nature (and practice) not self documenting, tests are the best artifact that developers can (be forced to) create as to what kind of uses and practices a unit of code was developed around. Otherwise, when you refactor, you are forced to do global searches for code utilization and understand far more about the code than you should need to before altering it. While this is still good practice even with code coverage, testing does give you at least one immediate feedback loop when you change it that you may be implementing destructive modifications. 
+
+So the only good argument for not testing is that you think your company is going to go under so quickly that you will never have time to revisit the code (that probably brought it down in the first place. :D  ) If you are developing a company that will succeed, best practice engineering becomes imperative. 
+
+So when the argument comes back, "Why are we wasting time with tests?" the best response is, "For the same reason we are writing code in the first place: to ensure the sustainability of the company." Innumerable times I have seen companies get to that point where their entire works seize up due to the critical mass of their codebase requiring a full stop and refactoring of the code in order to make any frontward progress. At one point in inheriting a huge mass of code I had to spend months uncovering its structure and documenting its purposes so that I could move forwards with even the most minute changes, a process I hope never to have to repeat. 
+
+So while the full steam ahead policy may give you the ability to last one or two rounds of funding, it inevitably costs you when you get to that point where you actually become viable (if not profitable), and your entire ecosystem shuts down because it was badly wrought, or its sole creator moves on, or the focus of the company shifts radically.
+
+The best reason to test your code is because you want to make money. Making money means keeping your doors open, responding to feature requests, and being able to mutate your systems to keep up with unexpected demands. Coverage keeps your developers aggressive about refactors, systematic about development, and confident in their ability to deliver reliable code. Best of all, it makes code more open to larger collaboration, because it serves as a contract between developers for given functionality.

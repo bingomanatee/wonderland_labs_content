@@ -1,0 +1,12 @@
+{
+    "file_name": "ps5_a_new_angle",
+    "title": "A New Angle",
+    "intro": "Adding an integrated REST service combining Eventful and TMSAPI data",
+    "revised": "2013-10-17 03:29",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "hive_mvc",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

@@ -1,0 +1,12 @@
+{
+    "file_name": "static_files",
+    "title": "Static Files",
+    "intro": "Injecting static files at the action level",
+    "revised": "2013-07-06 08:53",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "hive_mvc",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

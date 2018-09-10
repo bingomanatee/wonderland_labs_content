@@ -1,0 +1,12 @@
+{
+    "file_name": "icosahedron",
+    "title": "Icosahedron",
+    "intro": "a data module that provides data on Icosahedron data",
+    "revised": "2013-08-29 03:02",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

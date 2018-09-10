@@ -1,0 +1,17 @@
+{
+    "file_name": "data_models",
+    "title": "Data Models",
+    "intro": "Data modeling is as \"hands-off\" in hive-mvc as views are in Backbone.",
+    "revised": "2014-06-26 04:10",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "hive_mvc",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

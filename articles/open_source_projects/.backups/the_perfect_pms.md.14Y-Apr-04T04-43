@@ -1,0 +1,14 @@
+After a talk I gave at a recent Hack Reactor I ran into someone who gave a pitch I've heard and made my self countless times. Given all the people working on it, the product has het to emerge and here is a few reasons I think it never will. 
+
+The pitch is for a perfect project management system. Something less fucked than Jira but more fuckable than Basecamp.
+
+## The elevator pitch
+
+Instead of creating a monster system, create a basic system and make expanding it modular. 
+
+## Why this is a sinkhole that will never get filled. 
+
+The kind of problems that PMS's have are only partly technical
+
+1. **Getting people to enter data into it reliably is one of the biggest problems in a PMS**. Most people are hard put to manage a "To Do" list much less a full blown PMS. They are too busy actually doing things to want to work on the paper trail. A developer who can fix 5-10 issues a day doesn't want a management task that will halve his throughput. 
+2. **Even when a basic system is adopted, the first thing PM's do is add overhead fields that make the process a drag.** Project Managers are notorious for adding multiple fields to a task system to facilitate their own work and upwards reporting. After they have had their way, the field entry process becomes so byzantine that only they themselves are willing to maintain it. The venn diagram between a system so simple that non PM's will use it and a system fully featured enough to allow PM's do do PMmy stuff has no overlap.

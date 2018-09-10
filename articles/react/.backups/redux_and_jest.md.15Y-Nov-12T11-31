@@ -1,0 +1,17 @@
+I have recently fallen afoul of the React/Flux paradigm in an experiment involving logins, social data and Firebase, build on React (Specifically the (React Starter Kit)[https://github.com/kriasoft/react-starter-kit]). 
+
+The lifeCycle (bootup) methods of React components are twitchy about exactly when you can and cannot use setState to initialize your state. Worse, all the docs on React use factory based classes while I'm opting for es6 based class structures (i.e., actual classes) because I find them more readable. So I decided to reboot with a more rigorous TDD ground-up version using redux as the data pipe. 
+
+## Why Redux?
+
+I chose Redux largely based on star/following; other than Flux which has better press, Redux is the most followed system; also, it promises a more streamlined process in which as GladOS puts it, "Speedy thing goes in, speedy thing comes out." The centralization of the state object in Redux is also appealing from a testability POV. While I can in theory create totally independent stores for data silos, the ability to replay a troublesome scenario with all the data assumptions baked in is something I've been hunting for for a while. 
+
+## What went wrong the first time?
+
+There was a lot of pass-around of state between components, and that got messy fast. Also, there were a lot of collisions where the mixin added listeners for data. Often, there were data cascades in which listeners to dispatch themselves wanted to dispatch more data, which is not a good thing in React land. 
+
+Also fundamentally a lot of code got written without test coverage; tis last thing is what I wanted to fix the next time around. 
+
+## If it weren't for reboots, we wouldn't have Heath Ledger. 
+
+In doing the reboot, before I got lost in the visual layer I wanted a robust, validated structure around the dispatcher, with test coverage. Jest (a superset of Jasmine) is the flavor of test coverage that is documented around React; one of the benefits for it is that it lets you write tests in context with your components, in a __tests__ folder within the component layer. Less welcome, Jest autoMocks any component you don't specifically earmark as "not mocked". Also, the es6 module system doesn't seem perfectly seamless in Jest (which may have something to do with Babel, not Jest, but...) As I ran i

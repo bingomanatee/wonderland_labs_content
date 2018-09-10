@@ -1,0 +1,17 @@
+{
+    "file_name": "icosahedron_data",
+    "title": "icosahedron-data",
+    "intro": "a zeromq/cluster based system of data transportation",
+    "revised": "2013-08-29 03:43",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

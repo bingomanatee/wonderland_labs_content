@@ -1,0 +1,12 @@
+{
+    "file_name": "hand_weapons",
+    "title": "Hand Weapons",
+    "intro": "hand weapon statistics in Suits",
+    "revised": "2015-02-10 07:27",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "suits",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

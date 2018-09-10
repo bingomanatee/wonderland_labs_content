@@ -1,0 +1,184 @@
+This is a step by step project generated in hive-mvc. part of this process was taking private frames and pushing them up to node-hive, a new specialized Github identity devoted to node-hive. 
+
+## Assumed Setup and knowledge
+
+I'm assuming you have Node installed on your system, github, and are not using some silly OS like Windows; the process shouldn't be different on Windows but I'm not up on the land mines you'll find there. Also you should be comfortable with command line tools. Lastly, you should have an **ssh key** on your computer you can provide to Heroku for security/authentication.
+
+## Creating a new site on Heroku
+
+I wa able to get my Heroku site up and running (as a default Express endpoint) in under an hour. I'm not going to duplicate the excellent Heroku documentation that can be found [here](https://devcenter.heroku.com/articles/getting-started-with-nodejs#write-your-app) in detail, but here in brief are the steps involved:
+
+1. **Create a Heroku account**.
+2. **Install the [Heroku Toolbelt](https://toolbelt.heroku.com/)**. 
+3. **Sign in to heroku** on the command line: `heroku login`.
+4. **Create your `web.js` file.**
+
+Here (step 4) is where things get specialized in hive-mvc. Hive is a *metasystem* -- it extends the functionality of Express to allow you to use a file-based system to define action endpoints. 
+
+This is my starting point for `passive-aggressive-1248`: 
+
+``` javascript
+
+/**
+ * Module dependencies.
+ */
+
+var express = require('express')
+    , http = require('http')
+    , path = require('path')
+    , util = require('util')
+    , mvc = require('hive-mvc');
+
+var app = express();
+var PORT = process.env.PORT || 5000;
+
+app.configure(function () {
+    app.set('port', PORT);
+    app.set('view engine', 'ejs');
+    app.engine('html', require('ejs').renderFile);
+    app.use(express.favicon());
+    app.use(express.logger('dev'));
+    app.use(express.bodyParser());
+    app.use(express.methodOverride());
+    app.use(express.cookieParser('rhinestones are forever'));
+    app.use(express.session());
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.use(app.router);
+    app.use(express.static(path.join(__dirname, 'public')));
+
+});
+
+app.configure('development', function () {
+    //app.use(express.errorHandler());
+});
+
+server = http.createServer(app);
+server.on('close', function () {
+    console.log('======== closing server');
+});
+
+
+var log_file = path.resolve(__dirname, 'actions.log');
+
+server.listen(app.get('port'), function () {
+    var apiary = mvc.Apiary({log_file: log_file, action_handler_failsafe_time: 3000}, __dirname + '/frames');
+    apiary.set_config('god_mode', true);
+    console.log('initializing apiary for port %s', PORT);
+    apiary.init(function () {
+        var view_helpers =            apiary.Resource.list.find({TYPE: 'view_helper', post: false}).records();
+        view_helpers.forEach(function(h){
+            console.log("found helper %s", h.name);
+        });
+        console.log('serving');
+        apiary.serve(app, server);
+    });
+});
+
+```
+
+All the hive-mvc activity happens *after* your express server launches. Extra endpoints are read from your file system as your frames directory is digested. 
+
+Our initial site will have a single action. inside the folder 
+`/your-heroku-app/frames/main/hives/main/actions/home/` you will create two files:
+
+#### home_config.json
+``` json
+{
+    "routes": {
+        "get": "/"
+    }
+}
+```
+
+#### home_view.html
+``` html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Passive Aggressive Home</title>
+</head>
+<body>
+<h1>Home</h1>
+<p>Welcome to Passive Aggressive 1248</p>
+</body>
+</html>
+```
+
+note this is a complete page; we will &quot;simplify&quot; (massive air quotes) this later by using the hive_layout frame to create a page wrapper for our content.
+
+**Continuing the deploy...**
+
+(this is actually **step 5.**)
+
+5. **declare dependencies with NPM** by creating an `package.json` file at root. 
+
+the NPM file used here is a bit expanded from the one in the heroku docs, of course, beause hive-mvc resources need to be included:
+
+``` json
+
+{
+  "name": "passive-aggressive-1248",
+  "version": "0.0.1",
+  "description": "A hive-mvc sample app",
+  "main": "web.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bingomanatee/passive-aggressive-1248.git"
+  },
+  "keywords": [
+    "hive-mvc"
+  ],
+  "author": "David Edelhart",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/bingomanatee/wonderland/issues"
+  },
+  "dependencies": {
+    "hive-loader": "0.0.2",
+    "hive-component": "0.0.1-a",
+    "hive-mvc": "~0.1.0",
+    "passport": "~0.1.17",
+    "express": "~3.3.8",
+    "ejs": "~0.8.4",
+    "gate": "~0.3.0",
+    "underscore": "~1.5.1",
+    "async": "~0.2.9",
+    "hive-menu": "0.0.1"
+  },
+  "devDependencies": {
+    "tap": "~0.4.4"
+  }
+}
+```
+
+## Adding in a little class: the `hive_layout` frame
+
+A big add in hive-layout is adding in well encapsulated frames to extend the functionality of your application. [hive_layout](https://github.com/node-hive/hive_layout) is one such pluggable resource.
+
+Simply dropping it into the `frames` subdirectory gives you the ability to wrap a layout file around your page. 
+
+Layouts are more than templates; they can include resources, helpers, models, javascript libraries, static files and others in a handy bundle called (shockingly) a layout. 
+
+The documentation in the hive_layout repo goes in to more detail. For now, we will use the stock layout, "bootstrap", that is a generic Twitter Bootstrap wrapper around our content.
+
+I added hive_layout as a submodule into my `frames` directory, and changed the configuration of the "main_config.json" to 
+
+``` json
+{
+    "layout_name": "bootstrap",
+    "routes": {
+        "get": "/"
+    }
+}
+
+```
+
+and our page now looks like this:
+
+![passive_aggressive.png](/blog_image/passive_aggressive.png)
+
+?[We will be adding custom functionality to the site](pa2_getting_data) in a later article.

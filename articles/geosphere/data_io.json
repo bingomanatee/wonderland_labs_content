@@ -1,0 +1,12 @@
+{
+    "file_name": "data_io",
+    "title": "Writing simulation data to Mongo (or other repos)",
+    "intro": "icosahedron-data allows you to run a simulation and save resulting data to Mongo or another repo system.",
+    "revised": "2013-09-03 07:12",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

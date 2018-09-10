@@ -1,0 +1,395 @@
+In ?[a previous article](passive_aggressive) we setup a basic Hive-MVC site, and hosted it on Heroku. 
+
+Up to now our site is basically a static frame; other than the layout wrapper there's little need to use node (or any backend system) at all because our site is not data driven. 
+
+We will change that here by giving our site a reason to live: to get data on vents by blending [eventful's API](http://api.eventful.com/) and IMDB in interesting and novel ways.
+
+## Getting Eventful
+
+At the decided risk of creating namespace nausea, we will be using Eventful's free API for event listings. Eventful's listings, unlike some other butheaded commercial offerings, doesn't even require a login for basic data retrieval. All you need is an authentication key. 
+
+Having signed up as an app and gotten our API key with a few minutes of clicking and documentation reading, we will associate it to our application. 
+
+### Creating a config file
+
+One of Node's best kept features is that the `require` command can interpret JSON directly into your context. So we will put our API key into a configuration file at root 
+
+``` json
+{
+    "eventful_auth_key": "xxxx"
+}
+```
+
+and read it in as a configuration file in our `web.js` code:
+
+``` javascript
+// ...
+
+server.listen(app.get('port'), function () {
+    var apiary = mvc.Apiary({log_file: log_file, action_handler_failsafe_time: 3000}, __dirname + '/frames');
+    apiary._config.setAll(require('./site_identity.json'));
+    apiary._config.setAll(require('./passport_config.json'));
+// ...
+```
+
+this will make the eventful auth key available as a config property of the apiary: 
+
+``` javascript
+console.log('site eventful key: %s:', apiary.get_config('eventful_auth_key'));
+// site eventful key: xxxx
+```
+
+## Proxying Eventful
+
+we will add the [`request` module by mikeal](https://github.com/mikeal/request) to our package.json file via `npm add request --save` and use it to get data from eventful. 
+
+The first and most brutal pass will create an action that both displays a search form and has a POST hook to proxy eventful responses and turn them out as JSON. 
+
+We will create an entirely self contained frame for events: 
+
+* `/frames/events/hives/main/actions/search/search_action.js` will be our node proxying script. 
+* `/frames/events/hives/main/actions/search/search_config.json` will have our routing, as before. 
+* `/frames/events/hives/main/actions/search/search_view.html` will have our search form.
+
+#### search_config.json
+
+Unlike our single-method get-based homepage, we will have two responses with this page: a *get* response that returns a form, and a *post* response that responds to the form and returns the results. 
+
+``` json
+
+{
+    "layout_name": "bootstrap",
+    "routes": {
+        "get": "/search",
+        "post": "/search"
+    }
+}
+```
+
+As before we are reusing the bootstrap layout for expediency. 
+
+The template will be a very simple form:
+
+``` html
+<form class="form-horizontal" id="event-search-form" method="POST" action="/search">
+    <div class="control-group">
+        <label class="control-label" for="search-input">Search Term</label>
+        <div class="controls">
+            <input type="text" name="search" id="search-input" placeholder="Search for events">
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn">Search for Events</button>
+        </div>
+    </div>
+</form>
+```
+note that the form's action posts straight back to this page -- and spits out API marku verbatim. 
+
+### The action script
+
+This backend script operates in two modes: *get* (in which it adds no functionality whatsoever) and *post* which vomits API data straight at the browser. 
+
+``` javascript
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var request = require('request');
+var _DEBUG = true;
+
+/* ------------ CLOSURE --------------- */
+
+function _url(context) {
+    // using the eventful auth key stored in the bootstrapping web.js file. 
+    return 'http://api.eventful.com/rest/events/search?location=San+Francisco&app_key=' + context.$apiary.get_config('eventful_auth_key');
+}
+/* -------------- EXPORT --------------- */
+
+module.exports = {
+
+
+    on_get_validate: function (context, done) {
+        done();
+    },
+
+    on_get_input: function (context, done) {
+        done()
+    },
+
+    on_get_process: function (context, done) {
+        done();
+    },
+
+    on_get_output: function (context, done) {
+        done();
+    },
+
+    /* -------------- POST ------------- */
+
+    on_post_validate: function (context, done) {
+        if (!context.search) {
+            // missing search term; we will use very brutal error handling here. No further processing will happen. 
+            done('no search term found');
+        } else {
+            done();
+        }
+    },
+
+    on_post_input: function (context, done) {
+        request.get(_url(context),
+            function (err, response, body) {
+                if (err) {
+                    done(err);
+                } else {
+                    context.$send(body, done);
+                }
+            })
+    },
+
+    on_post_process: function (context, done) {
+        done();
+    },
+
+    on_post_output: function (context, done) {
+        done();
+    }
+}
+```
+
+And Presto! when you click search, you get something (like):
+
+``` json
+
+
+{"last_item":null,"total_items":"12061","first_item":null,"page_number":"1","page_size":"10","page_items":null,"search_time":"0.167","page_count":"1207","events":{"event":[{"watching_count":null,"calendar_count":null,"comment_count":null,"region_abbr":"CA","postal_code":"94519","going_count":null,"all_day":"0","latitude":"37.9807203","groups":null,"url":"http://eventful.com/concord/events/alanon-/E0-001-062067702-3?utm_source=apis&utm_medium=apim&utm_campaign=apic","id":"E0-001-062067702-3","privacy":"1","city_name":"Concord","link_count":null,"longitude":"-122.0220486","country_name":"United States","country_abbr":"USA","region_name":"California","start_time":"2013-10-29 07:00:00","tz_id":null,"description":" <b>Location:</b> <br>Cafe<br><br>","modified":"2013-10-05 08:07:06","venue_display":"1","tz_country":null,"performers":null,"title":"AlAnon","venue_address":"3039 Willow Pass Road","geocode_type":"EVDB Geocoder","tz_olson_path":null,"recur_string":null,"calendars":null,"owner":"evdb","going":null,"country_abbr2":"US","image":null,"created":"2013-10-05 08:07:06","venue_id":"V0-001-000648582-2","tz_city":null,"stop_time":null,"venue_name":"First Christian Church Concord","venue_url":"http://eventful.com/concord/venues/first-christian-church-concord-/V0-001-000648582-2?utm_source=apis&utm_medium=apim&utm_campaign=apic"},{"watching_count":null,"calendar_count":null,"comment_count":null,"region_abbr":"CA","postal_code":"94519","going_count":null,"all_day":"0","latitude":"37.9807203","groups":null,"url":"http://eventful.com/concord/events/jonesavila-weddingsanctuary-/E0-001-061526764-6?utm_source=apis&utm_medium=apim&utm_campaign=apic","id":"E0-001-061526764-6","privacy":"1","city_name":"Concord","link_count":null,"longitude":"-122.0220486","country_name":"United States","country_abbr":"USA","region_name":"California","start_time":"2013-10-19 02:00:00","tz_id":null,"description":null,"modified":"2013-09-21 08:31:33","venue_display":"1","tz_country":null,"performers":null,"title":"Jones-Avila Wedding/Sanctuary","venue_address":"3039 Willow Pass Road","geocode_type":"EVDB Geocoder","tz_olson_path":null,"recur_string":null,"calendars":null,"owner":"evdb","going":null,"country_abbr2":"US","image":null,"created":"2013-09-21 08:31:33","venue_id":"V0-001-000648582-2","tz_city":null,"stop_time":null,"venue_name":"First Christian Church Concord","venue_url":"http://eventful.com/concord/venues/first-christian-church-concord-/V0-001-000648582-2?utm_source=apis&utm_medium=apim&utm_campaign=apic"},{"watching_count":null,"calendar_count":null,"comment_count":null,"region_abbr":"CA","postal_code":null,"going_count":null,"all_day":"0","latitude":"37.9868057","groups":null,"url":"http://eventful.com/fairfax_ca/events/pocket-change-/E0-001-061184688-9?utm_source=apis&utm_medium=apim&utm_campaign=apic","id":"E0-001-061184688-9","privacy":"1","city_name":"Fairfax","link_count":null,"longitude":"-122.5885738","country_name":"United States","country_abbr":"USA","region_name":"California","start_time":"2013-10-18 21:00:00","tz_id":null,"description":" We&#39;re back with a vengence at Peri&#39;s in Fairfax for a fun-filled evening of 80&#39;s Rock and Soul for all of you who like to party and dance to your favorite tunes of the best decade ever! Music starts at 9 p.m.","modified":"2013-10-07 07:45:18","venue_display":"1","tz_country":null,"performers":null,"title":"Pocket Change","venue_address":"29 Broadway","geocode_type":"EVDB Geocoder","tz_olson_path":null,"recur_string":null,"calendars":null,"owner":"evdb","going":null,"country_abbr2":"US","image":null,"created":"2013-09-13 12:38:46","venue_id":"V0-001-000273210-2","tz_city":null,"stop_time":null,"venue_name":"Peri's Silver Dollar","venue_url":"http://eventful.com/fairfax_ca/venues/peris-silver-dollar-/V0-001-000273210-2?utm_source=apis&utm_medium=apim&utm_campaign=apic"},{"watching_count":null,"calendar_count":null,"comment_count":null,"region_abbr":"CA","postal_code":"94519","going_count":null,"all_day":"0","latitude":"37.9807203","groups":null,"url":"http://eventful.com/concord/events/aa-/...
+```
+
+except, there are a lot of things wrong about the approach and the site. Lets make the manatees happy and add some pro touches to this.
+
+## The things that are terrible at this point:
+
+Many many things are suboptimal here:
+
+1. There is no way to get to this search page
+2. The search form is locked to San Francisco
+3. The search form does not react in any way to the users search input
+4. The input is not consumer friendly
+5. We have hard-coded a model within our action
+
+Let's address them one by one; and add, "6. our layout is generic and boring" to the mix. 
+
+Not only do we want to add a link to the home page to this search page, but we want to be able to get to it off the left navigation. This means we have to stop leaning on our bootstrap boilerplate layout, and create our own ... but for now lets make do with a link in the home page. Changing the home page template to 
+
+``` html
+
+<h1>Home</h1>
+<p>Welcome to Passive Aggressive 1248</p>
+
+<p>
+    <button class="btn btn-large btn-primary" onclick="document.location='/search'">Search for movies</button>
+</p>
+
+```
+
+makes the mantees less sad -- not happy, but less sad:
+
+![pa_homepage_2.png](/blog_image/pa_homepage_2.png)
+
+Now, let's add a location search field to the form, and while we are at it, make both fields required. 
+
+#### search_view.html
+
+``` html
+<form class="form-horizontal" id="event-search-form" method="POST" action="/search">
+    <div class="control-group">
+        <label class="control-label" for="search-input">Location</label>
+        <div class="controls">
+            <input type="text" name="location" id="location-input" required placeholder="Search for location">
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="search-input">Search Term</label>
+        <div class="controls">
+            <input type="text" name="search" id="search-input" required placeholder="Search for events">
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn">Search for Events</button>
+        </div>
+    </div>
+</form>
+```
+
+Also lets expand the location and search functionality into our action. Our parameters are getting too big for hand coded parameters so we are using the request `qs parameterized form of get now:
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var request = require('request');
+var _DEBUG = false;
+
+/* ------------ CLOSURE --------------- */
+
+var EVENTFUL_SEARCH_URL = 'http://api.eventful.com/json/events/search';
+
+/* -------------- EXPORT --------------- */
+
+module.exports = {
+//...
+
+    /* -------------- POST ------------- */
+
+    on_post_validate: function (context, done) {
+        if (!context.search) {
+            // missing search term; we will use very brutal error handling here. No further processing will happen.
+            done('no search term found');
+        } else if (!context.location) {
+            done('no location found')
+        } else {
+            done();
+        }
+    },
+
+    on_post_input: function (context, done) {
+        var params = {
+            url: EVENTFUL_SEARCH_URL,
+          qs: {
+             app_key: context.$apiary.get_config('eventful_auth_key'),
+            location: context.location, keywords: context.search
+        }
+    };
+
+        request.get(
+            params,
+            function (err, response, body) {
+                if (err) {
+                    done(err);
+                } else {
+                    context.$send(body, done);
+                }
+            })
+    },
+
+// ...
+}
+
+```
+
+Now when we search for action movies in New York City, NY, we get relevant results:
+
+![got_yr_action_flix_right_here.png](/blog_image/got_yr_action_flix_right_here.png)
+
+gives us amongst other things, 2 fast 2 furious in New York City, NY. 
+
+## What about the part where our results do not look like crap?
+
+We can of course tableify them at the server level. That is the most minimal kind of formatting we can do so lets:
+
+and once we do, a lot of things become evident: 
+
+1. The data is gappy.
+2. It has some spam links in it.
+3. You don't get too many listings per page
+4. event data and venue data is redundant. 
+
+The latter is if you think about it, for an obvious reason; this is denormalized data, in which events and venues are a many to many relationship. 
+
+Lets solve these problems one by one. We have a lot on our plate so lets spin through this with quick fixes when possible. 
+
+### The data is gappy
+
+End times are often missing; postal codes are hit and miss. Most of this we can solve with conditional templating: 
+
+``` html
+
+<style>
+    .event-listing tbody td {
+        vertical-align: top;
+        font-size: 85%;
+
+    }
+
+    .event-listing thead th {
+        font-size: 100%;
+        text-transform: uppercase;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .event-listing .title {
+        font-weight: bold;
+        font-size: 120%;
+        padding: 0em 2em 0em 1em;
+    }
+
+    .event-listing .venue {
+        min-width: 30em;
+        font-weight: bold;
+    }
+
+    .event-listing .venue h3 {
+        font-size: 100%;
+        marign: 0;
+        pardding: 0;
+        margin-bottom: 0.5em;
+        color: magenta;
+    }
+</style>
+<table class="event-listing">
+    <thead>
+    <tr>
+        <th>Venue</th>
+        <th>Description</th>
+    </tr>
+
+    </thead>
+
+    <tbody>
+    <% events.events.event.forEach(function(e){ %>
+    <tr>
+        <td colspan="2" class="title"><%= e.title %></td>
+    </tr>
+    <tr>
+        <td class="venue"><h3><%= e.venue_name %></h3>
+            <address>
+                <% if (e.venu_address) { %><%= e.venue_address %><br/> <% } %>
+                <%= e.city_name %>, <%= e.region_name %> <% if (e.postal_code ){ %> <%= e.postal_code %> <% } %>
+            </address>
+            <% if (e.start_time && e.end_time){%>
+            <dl>
+                <dt>from</dt>
+                <dd><%= e.start_time %></dd>
+                <dt>to</dt>
+                <dd><%= e.end_time %></dd>
+            </dl>
+            <% } else if (e.start_time) { %>
+
+            <dl>
+                <dt>at</dt>
+                <dd><%= e.start_time %></dd>
+            </dl>
+            <% } %>
+        </td>
+        <td><%- e.description %></td>
+    </tr>
+
+    <% })// end foreach
+    %>
+    </tbody>
+</table>
+<% } // if events
+%>
+
+```
+
+resulting in:
+
+![event_results_tabular.png](/blog_image/event_results_tabular.png)
+
+the manatees are less irritable but would still like more listings without a lot of scrolling. This we solve on the backend by polling all the pages at once and concatenating the results:

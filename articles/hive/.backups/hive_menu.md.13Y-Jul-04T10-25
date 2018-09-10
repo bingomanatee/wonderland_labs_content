@@ -1,0 +1,20 @@
+Hive-Menu is a very simple memory-model for hierarchical collections of links. 
+
+It has two base classes: Menu and Item. 
+
+* Menu has an items array that contains other menus and items. 
+* Item is a "leaf" link definition. 
+
+You can define a menu structure in a single construct
+
+``` javascript
+	var menu = new hive_menu.Menu({
+		name:  'foo',
+		title: 'Foo',
+		items: [
+			{title: 'Alpha', name: 'alpha', link: '/alpha', weight: 1},
+			{title: 'Beta', name: 'beta', meta: {active: true}, link: '/beta', weight: 0}
+		]});
+```
+
+or you can

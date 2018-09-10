@@ -1,0 +1,17 @@
+{
+    "file_name": "web_reboot",
+    "title": "What the Web wants is better web.",
+    "intro": "the top NPM projects reflect the fact that we want processes to be better.",
+    "revised": "2016-01-20 12:33",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "file_name": "cleaning_up_icosahedrons",
+    "title": "Cleaning up Icosahedrons from three.js",
+    "intro": "Cleaning up Icosahedrons -- or, everything is harder than you think it should be",
+    "revised": "2013-08-20 10:28",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

@@ -1,0 +1,42 @@
+Fools is a set of functional recipes for very common architectural patterns. 
+
+Some of these patterns are very close to javascript logical patterns (**if**, **case**, **while**, etc.). 
+
+Others take on more invested tasks like a weighted ranking, (`rate`), sorting things into numeric brackets(`rank`), finding matching `pairs` or building blocks for a rules based system (`gauntlet`, `fork`, `until`). Even looping over a multidimensional dataset is easier with `loop`. 
+
+## Why? 
+
+The original goal for Fools was to create a rules based system for Javascript (Functional rOOLS). However along that road I found a few patterns that were cluttering up my code and begged for a more systematic approach. These are very much "sugar stuff". For instance the common deep tree
+
+``` javascript
+
+for (var i = -10; i <= 10; ++i){
+  for (var j = -100; j <= 100; ++j){
+    for (var k = -100; k <= 100; ++k){
+      console.log('i: ', i, 'j: ', j, 'k: ', k);
+    }
+  }
+}
+```
+
+really eats up a lot of visual space; 
+
+``` javascript
+Fools.loop(function(iter){ console.log('i:', iter.i, 'j:', iter.j, 'k:', iter.k);})
+.dim('i', -10, 10).dim('j', -100, 100).dim('k', -100, 100)();
+```
+is much more compact. Even better, Fools.loop returns a function which can be executed in any place a function is appropriate. You can even return a memo from it:
+
+``` javascript
+Fools.loop(function(iter, memo){
+  if (iter.i == 0 || iter.j == 0 || iter.k == 0) {
+    memo.push(iter);
+  }
+  return member;
+})
+.dim('i', -10, 10).dim('j', -100, 100).dim('k', -100, 100)([]);
+```
+
+This very simple iterator will return an array of all points in the matrix that are along the axes. 
+
+##

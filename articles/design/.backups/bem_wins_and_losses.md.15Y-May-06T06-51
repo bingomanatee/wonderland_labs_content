@@ -1,0 +1,63 @@
+[BEM](https://en.bem.info/method/) is a set of principles in CSS design. On the face of it it is a naming convention for CSS but in practice it is a deeper set of principles about how and when you use names and what styles and css methodology you do and do not use. 
+
+## The Why of Fry
+
+Before describing the what a note on the why: 
+
+The premise here is that CSS rules that overlap obscure and frustrate developers on large teams and projects (and large teams with large projects). The chance for style definitions intended for one context spilling into another, and for frustrated developers to `!important;` -stamp their work just to force their desired outcomes. 
+
+consider this set of tags:
+
+```` html
+
+<html>
+  <section class="topnav">
+     <div id="welcome">
+       <h1>Welcome to <a href="/" class="header-link">Dinosaurs.com</a></h1>
+     </div>
+  ...
+   </section>
+</html>
+
+````
+
+How many ways can css affect the link? 
+
+```` css
+html h1 {color: red}
+h1.link {color.green}
+a {color: blue}
+#welcome {color: black}
+section a {color: orange}
+h1 {color: yellow}
+````
+
+This is a significant problem with CSS. All of these technically valid patterns of style designation logjam and when a problem is detected, backing out of it in a large site with many existing markup tags is a nightmare. 
+
+If you're curious click <a class="btn" target="_blank" href="https://jsfiddle.net/bingomanatee/je7t25rd/embedded/result/">Here</a>
+
+The beauty -- and danger -- of CSS is that it cascades. 
+
+## Local Ownership
+
+BEM attempts to fix that by doing CSS without cascading effects by funneling all CSS into element level tags in which 100% of the style for its target is contained in that (or those) class(es). I.e., 
+
+* No element level tags, whether global (`h1 {color:orange}`) or modifying (`h1{color: blue}`).
+* No multi-element rules (`h1 a{color: blue}`)
+* No id rules (which regardless, you should be observing anyway) (`#head {color: black)`)
+* No positional or content related tags (`.field[type="input"] { color: red }`)
+
+## The REM of BEM
+
+In place of that multitude, BEM has three simple classes of CSS tags, 
+
+1. **Block** tags, for overarching containers (`.article { font-size: 1.5rem }`)
+2. **Element** tags, applied inside said container (`.article__paragraph { margin-bottom: 1rem }`)
+3. **Modifier** tags, applied following element tags in special circumstances (`.article__paragraph--last { margin-bottom: 0 }`)
+
+From this we get the acronym **BEM**. 
+
+a few more notes:
+
+* Blocks can be inside other blocks
+* Modifier tags are only used as siblings of their base class

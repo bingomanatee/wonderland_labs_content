@@ -1,0 +1,10 @@
+There are a few recurring patterns that I've found for managing large scale projects that make them easier to develop and grow. 
+
+1. Create and model clear state changes
+
+Understanding the state of the application and its components is critical to keeping large products under control. This includes modelling the security concerns into the state.
+
+* Which states are enterable without security access (public/anonymous)
+* Which level of security must be achieved to enter in specific states
+* What the pattern of traversal of states is - linear, random access, hierarchical. 
+* How does the creation or modification of data add or change the availability of states

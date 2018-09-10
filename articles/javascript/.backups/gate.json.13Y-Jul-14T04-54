@@ -1,0 +1,17 @@
+{
+    "file_name": "gate",
+    "title": "Gate: the missing async method",
+    "intro": "Handling indefinite delay with Gate",
+    "revised": "2013-07-14 04:54",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "javascript",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

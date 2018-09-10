@@ -1,0 +1,21 @@
+I always found "Prototypical" to be a very complex and overly glorified way of describing what Javascript does with the class model. I thought I would give a stab at breaking down the basics of how and why Javascript does instantiation the way it does. 
+
+## Some fundamental but very important concepts
+
+### Objects are Hashes. 
+
+Seems simple enough but getting this is vital to getting anything real done with Javascript. A hash is a set of name-value pairs -- basically a labelled keychain. In a deeper sense it is also a __namespace__ -- that is, for the object variable, each *value* is called *name*. 
+
+``` javascript
+var fred = {wife: 'Wilma', kids: 1, male: true, says: ['hey boo boo', 'yabba dabba doo']};
+console.log('Freds is male: ', fred.male, ' and his wife is ', fred.wife) // true, wilma
+
+var barney = {wife: Betty', kids: 1, male: true, says: []}
+console.log('Barney is male:, barney.male, ' and his wife is ', barney.wife) // true, betty
+
+// lets give Barney a sex change
+barney.male = false;
+console.log('Barney is male:, barney.male, ' and his very upset wife is ', barney.wife) // false, betty
+```
+
+The javascript's engine's task of finding the value of an object by key is pretty readable here. You have set these values in creation, and as shown for poor Barney, you can change them by setting the dot-reference.

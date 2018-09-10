@@ -1,0 +1,5 @@
+This is a step by step project generated in hive-mvc. part of this process was taking private frames and pushing them up to node-hive, a new specialized Github identity devoted to node-hive. 
+
+## Creating a new site on Heroku
+
+I wa able to get my Heroku site up and running (as a default Express endpoint) in under an hour. I'm not going to duplicate the excellent Heroku documentation that can be found here in detail, but here in brief are the steps involved:

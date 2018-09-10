@@ -1,0 +1,595 @@
+about as good as you’d expect
+
+## You can Selenium
+
+Running Selenium tests in node can be done with ANY client side app/web page. Selenium is a web service typically running on a local / desktop server that operates your browser, simulating user actions (clicks, text / form entries, etc.). It works with Chrome, Firefox, and IE. 
+
+# A sample use case
+
+the following site runs tests agains a site I cooked up to test a site that pulls data from [http://developer.tmsapi.com/](http://developer.tmsapi.com/io-docs) and displays movie listings from that data. 
+
+There are two pages that are tested.
+
+1. the home page has a set of menus that change when clicked.
+2. the event listing page that display a set of events keyed by category('movie') and location (zip code). When an event is clicked on, the showtimes are revealed.
+
+Note that the tests target two different URLs: 
+
+* `http://passive-agressive-1248.herokuapp.com/` (the live site. Since the locations and event types are static, basic naviation can be tested on the live site and the results should be consistent.)
+* `http://localhost:5000` (when running against mock data).
+
+The live site uses API keys to pull the original data into a postgres database. However, the API interaction is sidestepped when using mock data, so you can test against the mock data without involving the APIs or postgres databases. That being said, the startup will expect and attempt to bootstrap against a local postgres database running on localhost:5432 named events (with no user specified). 
+
+### Site and Test source on Github
+
+* The integration tests are in the repository [passive-aggressive-1248-integration-tests](https://github.com/bingomanatee/passive-aggressive-1248-integration-tests); they use the `tap` module for execution, and include my custom library [utils.js](https://github.com/bingomanatee/passive-aggressive-1248-integration-tests/blob/master/tests/lib/utils.js) that simplifies a lot of common test functionalities. 
+
+
+
+The site under tests is [passive-aggressive-128](https://github.com/bingomanatee/passive-aggressive-128). it runs on Heroku, or your local environment. 
+
+## Writing your tests
+
+You can use any (tap, mocha, assert) module you want to run Selenium. In Node, Selenium is accessed by a module `wd` (WebDriver) that sends and receives signals to a running instance of the Selenium server. This in turn opens an actual web broswer and operates it, "Puppeting" use commands. 
+
+## Why Selenium?
+
+Selenium has a lot of things going for it.
+
+1. tests real code (for reals) against real browsers (super serial!) 
+2. has minimal intrusion on the local JS environment
+3. can test any site - local, staging, live, someone else’s
+
+Many other competitors exist but use "Virtual browsers". These browsers may or may not express bugs and flaws that real browsers exhibit. With Selenium, you have a fair amount of confidence that if Selenium can get things done with your UI, so can your users. 
+
+## A Sample Selenium Test
+
+The test below uses the TAP test protocol to manage a set of tests, operating a remote site (hosted on Heroku). 
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var tap = require('tap');
+var wd = require('wd');
+var utils = require('./lib/utils');
+
+tap.test('navigation', {timeout: 1000 * 200, skip: false }, function (suite) {
+
+    suite.test('home page', {timeout: 1000 * 100, skip: false }, function (hp_test) {
+        var browser = wd.remote();
+
+        function _abort(err) {
+            browser.quit(function () {
+                if (err) {
+                    console.log('error: ', err);
+                    hp_test.error(err);
+                }
+                hp_test.end();
+            });
+        }
+
+        browser.init({
+            browserName: 'chrome', tags: ["examples"], name: "navigation"
+        }, function () {
+            browser.get("http://passive-agressive-1248.herokuapp.com/", function () {
+                setTimeout(function () {
+                    browser.title(function (err, title) {
+                        console.log('result of title: %s, %s', err, title);
+                        hp_test.equal(title, 'Passive Aggressive 1248', 'title is equal');
+
+                        utils.visible(browser, 'button.all-locations')
+                            .then(function (visible) {
+                                hp_test.ok(!visible, 'all locations button is not yet visible')
+                            }, _abort)
+                            .then(function () {
+                                return utils.visible(browser, 'button.portlandor')
+                            })
+                            .then(function (visible) {
+                                hp_test.ok(visible, 'Portland button is visible');
+                            }, _abort)
+                            .then(function () {
+                                return utils.visible(browser, 'button.nyc')
+                            })
+                            .then(function (visible2) {
+                                hp_test.ok(visible2, 'New York button is visible');
+                            }, _abort)
+                            .then(function () {
+                                return  utils.click(browser, 'button.portlandor')
+                            })
+                            .then(function () {
+                                return  utils.visible(browser, 'button.nyc');
+                            }, _abort)
+                            .then(function (visible3) {
+                                hp_test.ok(!visible3, 'NY button no longoer visible');
+                            }, _abort)
+                            .then(function () {
+                                return  utils.visible(browser, 'button.all-locations')
+                            })
+                            .then(function (visible) {
+                                hp_test.ok(visible, 'all locations button is now visible')
+                            }, _abort)
+                            .then(function () {
+                                return  utils.click(browser, 'button.all-locations')
+                            })
+                            .then(function (visible4) {
+                                hp_test.ok(!visible4, 'New York button is not visible finally');
+                            }, _abort)
+                            .then(function () {
+                                browser.quit(function () {
+                                    hp_test.end();
+                                });
+                            })
+                    });
+                }, 3000); // give Angular some time to format template
+            });
+        });
+    });
+
+    suite.test('get movies', {timeout: 1000 * 100, skip: false }, function (movie_test) {
+
+        var browser = wd.remote();
+
+        function _abort(err) {
+            browser.quit(function () {
+                if (err) {
+                    movie_test.error(err);
+                }
+                movie_test.end();
+            });
+        }
+
+        browser.init({
+            browserName: 'chrome', tags: ["examples"], name: "navigation"
+        }, function () {
+            browser.get("http://passive-agressive-1248.herokuapp.com/", function () {
+                setTimeout(function () {
+                    utils.visible(browser, 'button.all-locations')
+                        .then(function (visible) {
+                            movie_test.ok(!visible, 'all locations button is not yet visible')
+                        }, _abort)
+                        .then(function () {
+                            return utils.visible(browser, 'button.portlandor')
+                        })
+                        .then(function (visible) {
+                            movie_test.ok(visible, 'Portland button is visible');
+                        }, _abort)
+                        .then(function () {
+                            return  utils.click(browser, 'button.portlandor')
+                        })
+                        .then(function () {
+                            return  utils.click(browser, 'button.event-movie')
+                        })
+                        .then(function () {
+                            setTimeout(function () {
+                                var css = '#paEventsCtrl h1';
+                                utils.getText(browser, css)
+                                    .then(function (text) {
+                                        movie_test.equal(text, 'Movies in zip Portland, OR', 'found event view title');
+                                        _abort();
+                                    }, _abort);
+
+                            }, 4000);
+                        });
+                }, 3000);
+            });
+        });
+    });
+
+    suite.end();
+
+});
+
+```
+
+They use a utility library that wraps a series of low-level commands into higher level utility functions
+
+## Selenium/node can get messy
+
+Selenium can be a rough user experience. Among its many issues, in Node, are:
+
+* **Nested Callbacks**: a general problem with Node, can get especially messy with `wd`, due to extended pipeline of calls. 
+* **Many steps to a single result**: Its rare to get what you want from a single call to `wd`; generally you have to do a series of calls to get a single unit of information. 
+* **Throws errors like a good metaphor**: Because you are very much "Probing in the dark" there are a lot of chances to talk off the pier  due to missing elements, long load times, slow javascript on the client, etc. 
+Repeated boilerplate tasks
+* **Difficult to understand what a test is testing for and why**: Even if you have the fortune to write a functioning test, its not always easy to read a test later on and understand what is going on. 
+
+## De-nesting callbacks
+
+One good way to make more readable/maintainable code is to use Promise to linearize the execution of `wd` methods. The `q` (queue) library is a popular implementation of promises in Node. 
+
+The basic premise is that if you return a promise at the end of an  asynchronous code, you can write procedures that wait for the async call to finish before executing their `.then` call(see above). 
+
+## Making reusable, easy to read utility functions
+
+Its worth your while to write “wrapper functions” that reduce “surface area” of your tests. 
+
+## Error Prone
+
+Its very easy to write code that throws/returns errors using Selenium. Asking for elements that aren't yet/still on the page is a classic way to do this. Catch the errors at every step and decide whether you really want to pass out the error or whether it is a usable result. 
+
+Generally speaking, `wd` throws errors unless its expectations are perfectly satisfied. 
+
+Generally speaking, you don't throw errors just because a test condition is not met; that's up to your testing framework to work out. So in your handling calls, you will often want to return a result (if just null/false) even if `wd` throws an error. 
+
+### Sample case: visibility test
+
+A classic browser test is to determine if an element is visible. The definition of "not visible" is generally speaking, expansive; that is, if the element is missing, that is a valid, non-error, definition of "not visible". So in writing a visibility handler, you will want to trap most errors and return true or false in nearly all situations: 
+
+``` javascript
+
+var utils = {
+  visible: function (browser, selector, timeout, done) {
+        if (_.isFunction(timeout)) {
+            done = timeout;
+            timeout = 0;
+        }
+
+        if (!timeout) {
+            timeout = 0;
+        }
+
+        if (done && _.isFunction(done)) {
+            browser.waitForElementByCssSelector(selector, timeout, function () {
+                browser.elementByCssIfExists(selector, function (err, element) {
+                    if (err) {
+                        done(null, false); // redirect 1 - returning false instead of an error. 
+                    } else if (element) {
+                        browser.isVisible(element, done); 
+                    } else {
+                        done(null, false); // redirect 2 -- returning false if the element is missing
+                    }
+                });
+            });
+        } else {
+            var deferred = Q.defer();
+
+            browser.waitForElementByCssSelector(selector, timeout, function () {
+                browser.elementByCssSelectorIfExists(selector, function (err, element) {
+                    if (_DEBUG)  console.log('visible.elementByCssIfExists %s result: %s, %s', selector, err, util.inspect(element));
+                    if (err) {
+                        deferred.resolve(false);
+                    } else if (typeof element == 'object') {
+                        browser.isVisible(element, function (err, visible) {
+                            if (err) {
+                                deferred.resolve(false); // redirect 1a - returning false instead of an error
+                            } else {
+                                deferred.resolve(visible);
+                            }
+                        })
+                    } else {
+                        deferred.resolve(false); // redirect 2a - returning false if element is missing
+                    }
+                });
+
+            });
+
+            return deferred.promise;
+        }
+    },
+}
+
+```
+
+## Testing Practices
+
+There is a lot of considerations when testing your client side interfaces. Primary amongst them, the necessity to control input data. 
+
+Normal sites' data is chaotic and transitive: it is a blend of 
+
+* backend / database / REST data
+* social data
+* widgets
+* third party fields
+* environmental data -- the current time, user identity, etc.
+
+While you can "test around" these variables, controlling as many of these variables as possible increases your ability to test your interface. 
+
+The decision then becomes, HOW do you channel your data through controllable sources. Presuming a fairly standard REST/web service centric app there are usually several good "Interception points" where you can substitute saved data for your real data.
+
+![forking_data.png](/blog_image/forking_data.png)
+
+There are three fundamental places where you can "shim in" data. 
+
+1. **at the client level**. You can force data into the application by using selenium's ability to communicate with client side javascript.
+2. **at the proxy level**. You can redirect calls to specific url patterns around your web server to a second source of data (say, a static file server)
+3. **at the server level**. You can create forks in our REST handlers that pull test case data under certain conditions. 
+
+I prefer the third solution as it "keeps everything under the same roof.".
+
+#### A sample: a REST handler that forks to static data when there is a "mock" parameter in the call
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var moment = require('moment');
+
+/* ------------ CLOSURE --------------- */
+var F = 'YYYY-MM-DD HH:mm';
+/* -------------- EXPORT --------------- */
+
+module.exports = {
+
+    on_validate: function (context, done) {
+
+        if (!(context.zip || context.id)) {
+            done('no zip or ID');
+        } else {
+            done();
+        }
+    },
+
+    on_get_input: function (context, done) {
+
+        if (context.mock) {
+/** 
+ * fork data handling to a special "mock server" that deals with 
+ * reading and writing static JSON text files.
+ */
+            var mock_model = this.model('mock_event_tables');
+
+            function _done(err, results) {
+                if (err) {
+                    done(err)
+                } else {
+                    context.$send(results, done);
+                }
+            }
+
+            if (context.id) {
+                    mock_model.get_event(context.mock, context.zip, context.id, _done, true);
+
+            } else {
+                mock_model.get_events(context.mock, context.zip, _done);
+            }
+        } else {
+
+            var locations = this.model('locations');
+            var model = this.model('event_tables');
+            if (context.id) {
+                model.event(context.id, function (err, event) {
+                    if (err) {
+                        return done(err);
+                    } else if (!event) {
+                        return done('Cannot find event ' + context.id);
+                    } else {
+                        var z = event.area;
+
+                        var loc = locations.get_zip(z);
+                        if (loc) {
+                            event.times = event.times.map(function (time) {
+                                //    console.log('start time: %s', time.start_time);
+                                var start = new moment(time.start_time);
+                                //  console.log('moment time: %s', start.format(F));
+                                start.add('hours', loc.timezone);
+                                //   console.log('after adding hours: %s: %s', loc.timezone, start.format(F));
+                                time.start_time = start.format(F);
+                                return time;
+                            })
+                        }
+                        context.$send(event, done);
+                    }
+
+                })
+            } else {
+                model.summary(context.category, context.zip, function (err, results) {
+                    if (err) return done(err);
+                    context.$send(results, done);
+                });
+            }
+        }
+    },
+
+/** 
+ * the real world data is "read only". 
+ * on a put call, the test case data is written back to a test case folder
+ * as a JSON file.
+ * 
+ * The mock_event_tables model handles the writing. 
+ */
+    on_put_input: function (context, done) {
+        if (!context.mock) { // you can only put mock data
+            done('no mock');
+        } else if (!context.data) {
+            done('no data')
+        } else {
+            var mock_model = this.model('mock_event_tables');
+
+            function _done(err, result) {
+                if (err) {
+                    done(err);
+                } else {
+                    context.$send(result, done);
+                }
+            }
+
+            if (context.id) {
+                mock_model.put_event(context.mock, context.zip, context.id, context.data, _done);
+            } else {
+                mock_model.put_events(context.mock, context.zip, context.data, _done);
+            }
+        }
+    },
+
+    on_process: function (context, done) {
+        done();
+    },
+
+    on_output: function (context, done) {
+        done();
+    }
+}
+
+```
+
+### Third party data, and "Dynamic expectations
+
+Social data and other third party data sources are very tough to deal with in a test context. The simple solution to this is to proxy them through your web server, giving you opportunities to use the same mocking strategy for third party data that you use for your own data. 
+
+If for some reason thats not feasible or desirable, you can adopt another strategy. 
+
+* inside your tests, gather the third party data that drives your application
+* Adjust your test expectations based on the known third party data
+
+This is a dicey proposition at best -- race conditions are very likely. 
+
+## Allowing for time
+
+Most pages vary with time. For instance, my test case, a movie listing site, shows all the movies playing today, with today's showtimes. Testing around data that varies with time requires a choice as to how to model time. 
+
+The simple varieties are: 
+
+1. force a simulated date throughout the data modelling. 
+2. Adjust your expectations based on the current time. 
+
+### Rigging Time
+
+Simulating a date involves substantial "rigging" of tests. However it guarantees consistent results. Many times you'll spend a lot of time hunting down direct time references (`new Date()`) to the current time, and third party code may not be subject to your control. 
+
+#### Sample model with dynamic date adjustment
+
+The following model handles the mock data. Note that it transforms all event dates to today if certain parameters are passed.
+
+This mock data source for the most part simply reads or writes data files, The only manipulation is done when single events are retrieved. 
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
+var rmdir = require('rmdir');
+var moment = require('moment');
+/* ------------ CLOSURE --------------- */
+
+/**
+ * This function changes the date element of all events to today's date.
+ * this would create a LOT of showtimes if done on natural data but is fine
+ * for user created data.
+ */
+ function _force_today(event){
+     if (event.time){
+         var now = new Moment();
+         event.times.forEach(function(time){
+            var t = new moment(time.start_time);
+             t.year(now.year());
+             t.day(now.day());
+             t.month(now.month());
+
+             time.start_time = t.format('YYYY-MM-DD HH:mm');
+         });
+     }
+}
+
+var TEST_CASES_DIR = path.resolve(__dirname, 'test_cases');
+/** ********************
+ * Purpose: create and replay mock events
+ * @return void
+ */
+
+function get_test_dir(test_case) {
+    return path.resolve(TEST_CASES_DIR, test_case);
+}
+
+function met(apiary, callback) {
+
+    var model = {
+        name: 'mock_event_tables',
+
+        delete_events: function (test_dir, done) {
+            if (!fs.existsSync(get_test_dir(test_dir))) {
+                done(new Error('no test case ' + test_dir));
+            } else {
+                try {
+                    rmdir(get_test_dir(test_dir), done);
+                } catch (err) {
+                    done(err);
+                }
+            }
+        },
+
+/* 
+ * the force_today parameter forces all scheduled times to 
+ * play today.
+ */
+        get_event: function (test_case, zip, id, done, force_today) {
+            model.get_events(test_case, zip + '_' + id, function(err, events){
+                if (!err && force_today){   _force_today(events);};
+                done(err, events)
+            });
+        },
+
+        get_events: function (test_case, zip, done) {
+            var test_dir = get_test_dir(test_case);
+
+            if (!fs.existsSync(test_dir)) {
+                return done(new Error('no data for test case ' + test_case));
+            }
+
+            var zip_file = path.resolve(test_dir, encodeURIComponent(zip) + '.json');
+
+            if (!fs.existsSync(zip_file)) {
+                return done(new Error(util.format('no data file for file %s', zip_file)));
+            }
+
+            fs.readFile(zip_file, {encoding: 'utf8'}, function (err, data) {
+                if (err) {
+                    done(err);
+                } else {
+                    try {
+                        data = JSON.parse(data);
+                        done(null, data);
+                    } catch (err) {
+                        done(err);
+                    }
+                }
+            });
+        },
+
+        put_event: function (test_case, zip, id, data, done) {
+            model.put_events(test_case, zip + '_' + id, data, done);
+        },
+
+        put_events: function (test_case, zip, data, done) {
+            if (!test_case) {
+                return done(new Error('no test case provided'));
+            }
+
+            var test_dir = get_test_dir(test_case);
+            if (!fs.existsSync(test_dir)) {
+                mkdirp.sync(test_dir, 0775);
+            }
+
+            if (!_.isString(data)) {
+                try {
+                    data = JSON.stringify(data);
+                } catch (err) {
+                    return done(err);
+                }
+            }
+
+            fs.writeFile(path.resolve(test_dir, zip + '.json'),
+                data, done);
+        }
+    }
+
+    callback(null, model);
+}
+
+/* -------------- EXPORT --------------- */
+
+module.exports = met;
+
+```
+
+## In Closing
+
+Testing dynamic sites require understanding the parts of your site that vary and controlling for their data. It also requires going beyond the raw methods of `wd` and customizing their flow to your testing needs. 
+
+That being said, once you get the spirit of integration tests, they are not much more difficult to write than standard testing, and give you the opportunity to test the parts of your application that the users care about most.

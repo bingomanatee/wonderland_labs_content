@@ -1,0 +1,17 @@
+{
+    "file_name": "ps5_integration_tests",
+    "title": "Integration Tests",
+    "intro": "integration testing can now be 100% javascript/node/selenium driven. And they hardly suck at all.",
+    "revised": "2013-10-17 04:22",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "hive_mvc",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

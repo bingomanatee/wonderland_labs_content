@@ -1,0 +1,30 @@
+Events are all over the place; dom hooks, IE's fucked up dom hooks, node, jQuery, Easel, Backbone, Angular ... and in nearly all cases the API is pretty much the same: 
+
+``` javascript
+
+context.listen('name', handler_fn); // or 'on'
+context.stopListening('name', handler_fn) // or 'off'
+
+```
+
+Why not put this into javascript core? 
+
+Anything not-scalar should have events:
+
+``` javascript
+var items = [];
+items.on('add', function(item, index){  console.log('added ', item, 'at', index); });
+item.on('change', function(changeDef){ console.log('changed array: ', changeDef });
+item.push('a', 'b', 'c'); // added called three times, changed called once
+
+var items = {};
+
+item.on('change:note', function(note){ console.log('note is ', note); });
+
+item.note = 'foo'; // echo 'note is foo'
+delete item.note // echo  undefined
+```
+
+As well as the usual dom stuff. 
+
+Events are so foundational to the way JS is written that it should be optimized, like animationFrame and the underscore stuff (reduce, map).

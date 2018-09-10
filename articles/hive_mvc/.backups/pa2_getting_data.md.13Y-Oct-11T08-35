@@ -1,0 +1,170 @@
+In ?[a previous article](passive_aggressive) we setup a basic Hive-MVC site, and hosted it on Heroku. 
+
+Up to now our site is basically a static frame; other than the layout wrapper there's little need to use node (or any backend system) at all because our site is not data driven. 
+
+We will change that here by giving our site a reason to live: to get data on vents by blending [eventful's API](http://api.eventful.com/) and IMDB in interesting and novel ways.
+
+## Getting Eventful
+
+At the decided risk of creating namespace nausea, we will be using Eventful's free API for event listings. Eventful's listings, unlike some other butheaded commercial offerings, doesn't even require a login for basic data retrieval. All you need is an authentication key. 
+
+Having signed up as an app and gotten our API key with a few minutes of clicking and documentation reading, we will associate it to our application. 
+
+### Creating a config file
+
+One of Node's best kept features is that the `require` command can interpret JSON directly into your context. So we will put our API key into a configuration file at root 
+
+``` json
+{
+    "eventful_auth_key": "xxxx"
+}
+```
+
+and read it in as a configuration file in our `web.js` code:
+
+``` javascript
+// ...
+
+server.listen(app.get('port'), function () {
+    var apiary = mvc.Apiary({log_file: log_file, action_handler_failsafe_time: 3000}, __dirname + '/frames');
+    apiary._config.setAll(require('./site_identity.json'));
+    apiary._config.setAll(require('./passport_config.json'));
+// ...
+```
+
+this will make the eventful auth key available as a config property of the apiary: 
+
+``` javascript
+console.log('site eventful key: %s:', apiary.get_config('eventful_auth_key'));
+// site eventful key: xxxx
+```
+
+## Proxying Eventful
+
+we will add the [`request` module by mikeal](https://github.com/mikeal/request) to our package.json file via `npm add request --save` and use it to get data from eventful. 
+
+The first and most brutal pass will create an action that both displays a search form and has a POST hook to proxy eventful responses and turn them out as JSON. 
+
+We will create an entirely self contained frame for events: 
+
+* `/frames/events/hives/main/actions/search/search_action.js` will be our node proxying script. 
+* `/frames/events/hives/main/actions/search/search_config.json` will have our routing, as before. 
+* `/frames/events/hives/main/actions/search/search_view.html` will have our search form.
+
+#### search_config.json
+
+Unlike our single-method get-based homepage, we will have two responses with this page: a *get* response that returns a form, and a *post* response that responds to the form and returns the results. 
+
+``` json
+
+{
+    "layout_name": "bootstrap",
+    "routes": {
+        "get": "/search",
+        "post": "/search"
+    }
+}
+```
+
+As before we are reusing the bootstrap layout for expediency. 
+
+The template will be a very simple form:
+
+``` html
+<form class="form-horizontal" id="event-search-form" method="POST" action="/search">
+    <div class="control-group">
+        <label class="control-label" for="search-input">Search Term</label>
+        <div class="controls">
+            <input type="text" name="search" id="search-input" placeholder="Search for events">
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn">Search for Events</button>
+        </div>
+    </div>
+</form>
+```
+note that the form's action posts straight back to this page -- and spits out API marku verbatim. 
+
+### The action script
+
+This backend script operates in two modes: *get* (in which it adds no functionality whatsoever) and *post* which vomits API data straight at the browser. 
+
+``` javascript
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var request = require('request');
+var _DEBUG = true;
+
+/* ------------ CLOSURE --------------- */
+
+function _url(context) {
+    // using the eventful auth key stored in the bootstrapping web.js file. 
+    return 'http://api.eventful.com/rest/events/search?location=San+Francisco&app_key=' + context.$apiary.get_config('eventful_auth_key');
+}
+/* -------------- EXPORT --------------- */
+
+module.exports = {
+
+
+    on_get_validate: function (context, done) {
+        done();
+    },
+
+    on_get_input: function (context, done) {
+        done()
+    },
+
+    on_get_process: function (context, done) {
+        done();
+    },
+
+    on_get_output: function (context, done) {
+        done();
+    },
+
+    /* -------------- POST ------------- */
+
+    on_post_validate: function (context, done) {
+        if (!context.search) {
+            // missing search term; we will use very brutal error handling here. No further processing will happen. 
+            done('no search term found');
+        } else {
+            done();
+        }
+    },
+
+    on_post_input: function (context, done) {
+        request.get(_url(context),
+            function (err, response, body) {
+                if (err) {
+                    done(err);
+                } else {
+                    context.$send(body, done);
+                }
+            })
+    },
+
+    on_post_process: function (context, done) {
+        done();
+    },
+
+    on_post_output: function (context, done) {
+        done();
+    }
+}
+```
+
+And Presto! when you click search, you get something (like):
+
+``` json
+
+
+{"last_item":null,"total_items":"12061","first_item":null,"page_number":"1","page_size":"10","page_items":null,"search_time":"0.167","page_count":"1207","events":{"event":[{"watching_count":null,"calendar_count":null,"comment_count":null,"region_abbr":"CA","postal_code":"94519","going_count":null,"all_day":"0","latitude":"37.9807203","groups":null,"url":"http://eventful.com/concord/events/alanon-/E0-001-062067702-3?utm_source=apis&utm_medium=apim&utm_campaign=apic","id":"E0-001-062067702-3","privacy":"1","city_name":"Concord","link_count":null,"longitude":"-122.0220486","country_name":"United States","country_abbr":"USA","region_name":"California","start_time":"2013-10-29 07:00:00","tz_id":null,"description":" <b>Location:</b> <br>Cafe<br><br>","modified":"2013-10-05 08:07:06","venue_display":"1","tz_country":null,"performers":null,"title":"AlAnon","venue_address":"3039 Willow Pass Road","geocode_type":"EVDB Geocoder","tz_olson_path":null,"recur_string":null,"calendars":null,"owner":"evdb","going":null,"country_abbr2":"US","image":null,"created":"2013-10-05 08:07:06","venue_id":"V0-001-000648582-2","tz_city":null,"stop_time":null,"venue_name":"First Christian Church Concord","venue_url":"http://eventful.com/concord/venues/first-christian-church-concord-/V0-001-000648582-2?utm_source=apis&utm_medium=apim&utm_campaign=apic"},{"watching_count":null,"calendar_count":null,"comment_count":null,"region_abbr":"CA","postal_code":"94519","going_count":null,"all_day":"0","latitude":"37.9807203","groups":null,"url":"http://eventful.com/concord/events/jonesavila-weddingsanctuary-/E0-001-061526764-6?utm_source=apis&utm_medium=apim&utm_campaign=apic","id":"E0-001-061526764-6","privacy":"1","city_name":"Concord","link_count":null,"longitude":"-122.0220486","country_name":"United States","country_abbr":"USA","region_name":"California","start_time":"2013-10-19 02:00:00","tz_id":null,"description":null,"modified":"2013-09-21 08:31:33","venue_display":"1","tz_country":null,"performers":null,"title":"Jones-Avila Wedding/Sanctuary","venue_address":"3039 Willow Pass Road","geocode_type":"EVDB Geocoder","tz_olson_path":null,"recur_string":null,"calendars":null,"owner":"evdb","going":null,"country_abbr2":"US","image":null,"created":"2013-09-21 08:31:33","venue_id":"V0-001-000648582-2","tz_city":null,"stop_time":null,"venue_name":"First Christian Church Concord","venue_url":"http://eventful.com/concord/venues/first-christian-church-concord-/V0-001-000648582-2?utm_source=apis&utm_medium=apim&utm_campaign=apic"},{"watching_count":null,"calendar_count":null,"comment_count":null,"region_abbr":"CA","postal_code":null,"going_count":null,"all_day":"0","latitude":"37.9868057","groups":null,"url":"http://eventful.com/fairfax_ca/events/pocket-change-/E0-001-061184688-9?utm_source=apis&utm_medium=apim&utm_campaign=apic","id":"E0-001-061184688-9","privacy":"1","city_name":"Fairfax","link_count":null,"longitude":"-122.5885738","country_name":"United States","country_abbr":"USA","region_name":"California","start_time":"2013-10-18 21:00:00","tz_id":null,"description":" We&#39;re back with a vengence at Peri&#39;s in Fairfax for a fun-filled evening of 80&#39;s Rock and Soul for all of you who like to party and dance to your favorite tunes of the best decade ever! Music starts at 9 p.m.","modified":"2013-10-07 07:45:18","venue_display":"1","tz_country":null,"performers":null,"title":"Pocket Change","venue_address":"29 Broadway","geocode_type":"EVDB Geocoder","tz_olson_path":null,"recur_string":null,"calendars":null,"owner":"evdb","going":null,"country_abbr2":"US","image":null,"created":"2013-09-13 12:38:46","venue_id":"V0-001-000273210-2","tz_city":null,"stop_time":null,"venue_name":"Peri's Silver Dollar","venue_url":"http://eventful.com/fairfax_ca/venues/peris-silver-dollar-/V0-001-000273210-2?utm_source=apis&utm_medium=apim&utm_campaign=apic"},{"watching_count":null,"calendar_count":null,"comment_count":null,"region_abbr":"CA","postal_code":"94519","going_count":null,"all_day":"0","latitude":"37.9807203","groups":null,"url":"http://eventful.com/concord/events/aa-/E0-001-044743886-1@2013101108?utm_source=apis&utm_medium=apim&utm_campaign=apic","id":"E0-001-044743886-1@2013101108","privacy":"1","city_name":"Concord","link_count":null,"longitude":"-122.0220486","country_name":"United States","country_abbr":"USA","region_name":"California","start_time":"2013-10-11 08:00:00","tz_id":null,"description":" <b>Location:</b> <br>Education Wing<br><br>","modified":"2013-10-05 08:15:38","venue_display":"1","tz_country":null,"performers":null,"title":"AA","venue_address":"3039 Willow Pass Road","geocode_type":"EVDB Geoco
+
+```
+
+except, there are a lot of things wrong about the approach and the site. Lets make the manatees happy and add some pro touches to this.

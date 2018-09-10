@@ -1,0 +1,273 @@
+The **Farnsworth Paradox** was an episode in Futurama where two parallel universes created a box with the other universe inside it: 
+
+>> Professor Farnsworth decides to destroy an experiment that nearly killed him in a yellow box by ejecting it into the sun. He forbids the Planet Express staff to open it, and Hermes assigns Leela to guard it. However, she is tempted by curiosity and flips a coin to decide whether to look in the box. The flip results in favor of looking in the box. Upon doing so, she falls into the box and finds herself in a parallel universe where everyone has identical personalities to their counterparts but most have an alternate hair color.
+The parallel Leela orders everyone in the original universe (except Hermes) to come into their universe by threatening them with a gun, as the parallel Professor believes that the original universe members are all evil. However, they all decide to discuss their differences over the meeting table.
+The two Farnsworths discover that, just as the original Farnsworth created a box containing a parallel universe, the parallel universe Farnsworth created a box containing the original universe. After arguing over which universe will be named Universe A and Universe B, the original universe is named Universe A and the parallel universe is named Universe 1.
+
+>> Although everyone is the same, Professor-A questions why Leela-A looked in the box whilst Leela-1 did not. Leela-1 says that she flipped a coin and it came up tails so she did not look, a complete opposite of what happened to Leela-A. Both professors observe that the key difference between both universes is that coin flips have opposite outcomes. They ask the two groups to watch their counterparts to determine if the other is evil. When Leela-1 asks if she and Fry-1 can watch their counterparts together because they have plans, Leela-A thinks that they are dating but she and Fry-A are amazed to find that they are married.
+
+![Futurama_ep69.jpg](/blog_image/Futurama_ep69.jpg)
+
+
+Its fairly easy to create require paradoxes in Node.js. 
+
+## Attempting Cross References
+Say you have a library folder like this: 
+
+```
+
+/lib/
+     index.js
+     Universe1.js
+     UniverseA.js
+
+```
+
+and you want index to be the "registry" for resources. These resource refer to each other.
+
+``` javascript
+module.exports = {
+
+    Universe1: require('./Universe1'),
+    UniverseA: require('./UniverseA')
+};
+
+```
+
+so now, you think, "great, now I can refer to my various resources by loading the index file."
+
+#### Universe1.js
+
+``` javascript
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+var index  = require('./index');
+
+function UniverseA(params) {
+}
+
+_.extend(Universe1.prototype, {
+    my_universe_box: function(){
+         return new index.UniverseA().i_am();
+    },
+    i_am: function () {
+        return 'Universe1';
+    }
+});
+
+module.exports = Universe1;
+
+```
+
+#### UniverseA.js
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+var index  = require('./index');
+
+function UniverseA(params) {
+}
+
+_.extend(UniverseA.prototype, {
+    my_universe_box: function(){
+         return new index.Universe1().i_am();
+    },
+    
+    i_am: function () {
+        return 'UniverseA';
+    }
+});
+
+module.exports = UniverseA;
+
+```
+
+the `my_universe_box` contains a describer of one Universe's instance of the other. the problem is you have a logical loop: the index loads a module, which attempts to load the index while it is still defining itself. 
+
+### The Test
+
+So now we put it to the test and it fails as expected.
+
+``` javascript
+
+var tap = require('tap');
+var util = require('util');
+
+var index = require('./../index');
+
+tap.test('Farnsworth', {timeout: 1000 * 10, skip: false }, function (suite) {
+
+    suite.test('UniverseA', {timeout: 1000 * 10, skip: false }, function (UniverseAtest) {
+        var UniverseA = new index.UniverseA();
+        UniverseAtest.equal( UniverseA.my_universe_box(), 'Universe1', 'Universe1 reference in UniverseA');
+        UniverseAtest.end();
+    });
+
+    suite.test('Universe1', {timeout: 1000 * 10, skip: false }, function (Universe1test) {
+        var Universe1 = new index.Universe1();
+        Universe1test.equal( Universe1.my_universe_box(), 'UniverseA', 'UniverseA reference in Universe1');
+
+        Universe1test.end();
+    });
+
+    suite.end();
+
+});
+
+```
+
+... and the result is an epic fail:
+
+``` bash
+/usr/local/bin/node test/farnsworth.test.js
+index: { Universe1: [Function: Universe1], UniverseA: [Function: UniverseA] }
+TAP version 13
+# Farnsworth
+# Universe1
+not ok 1 TypeError: undefined is not a function
+  ---
+    type:    TypeError
+    message: undefined is not a function
+    code:    called_non_callable
+    errno:   ~
+    file:    /Users/dave/Documents/node/farnsworth/Universe1.js
+    line:    9
+    column:  19
+    stack:   
+      - new Universe1 (/Users/dave/Documents/node/farnsworth/Universe1.js:9:19)
+      - Test.<anonymous> (/Users/dave/Documents/node/farnsworth/test/farnsworth.test.js:13:20)
+      - Test.EventEmitter.emit (events.js:117:20)
+      - Test.emit (/Users/dave/Documents/node/farnsworth/node_modules/tap/lib/tap-test.js:104:8)
+      - Test.Harness.process (/Users/dave/Documents/node/farnsworth/node_modules/tap/lib/tap-harness.js:87:13)
+      - process._tickCallback (node.js:415:13)
+      - Function.Module.runMain (module.js:499:11)
+      - startup (node.js:119:16)
+      - node.js:901:3
+    thrown:  true
+  ...
+# UniverseA
+not ok 2 TypeError: undefined is not a function
+  ---
+    type:    TypeError
+    message: undefined is not a function
+    code:    called_non_callable
+    errno:   ~
+    file:    /Users/dave/Documents/node/farnsworth/UniverseA.js
+    line:    9
+    column:  19
+    stack:   
+      - new UniverseA (/Users/dave/Documents/node/farnsworth/UniverseA.js:9:19)
+      - Test.<anonymous> (/Users/dave/Documents/node/farnsworth/test/farnsworth.test.js:20:20)
+      - Test.EventEmitter.emit (events.js:117:20)
+      - Test.emit (/Users/dave/Documents/node/farnsworth/node_modules/tap/lib/tap-test.js:104:8)
+      - Test.Harness.process (/Users/dave/Documents/node/farnsworth/node_modules/tap/lib/tap-harness.js:87:13)
+      - process._tickCallback (node.js:415:13)
+      - Function.Module.runMain (module.js:499:11)
+      - startup (node.js:119:16)
+      - node.js:901:3
+    thrown:  true
+  ...
+
+1..2
+# tests 2
+# fail  2
+
+Process finished with exit code 0
+
+```
+
+The problem is that there is a race condition between the loading of each Universe module and the definition of the index.
+
+This separates in time the requirement of the `index.js` file with the instantiation of the second universe. Since the main body of the closure of each universe does not recursively refer to the index file, there is no attempt to re-poll the index file as it is defining itself. 
+
+## The Solution
+
+One way to resolve this is to embed the require inside of a method: 
+
+#### Universe1
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+function Universe1(params) {
+}
+
+_.extend(Universe1.prototype, {
+    UniverseAis: function(){
+        var UniverseA =  require('./index').UniverseA;
+        return new UniverseA({}).i_am();
+    },
+
+    i_am: function () {
+        return 'Universe1';
+    }
+});
+
+module.exports = Universe1;
+```
+
+#### UniverseA
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+
+function UniverseA(params) {
+}
+
+_.extend(UniverseA.prototype, {
+    Universe1is: function(){
+        var Universe1 =  require('./index').Universe1;
+        return new Universe1({}).i_am();
+    },
+
+    i_am: function () {
+        return 'UniverseA';
+    }
+});
+
+module.exports = UniverseA;
+```
+
+#### Result:
+
+``` bash
+
+/usr/local/bin/node test/farnsworth.test.js
+TAP version 13
+# Farnsworth
+# UniverseA
+ok 1 Universe1 reference in UniverseA
+# Universe1
+ok 2 UniverseA reference in Universe1
+
+1..2
+# tests 2
+# pass  2
+
+# ok
+
+Process finished with exit code 0
+
+```
+
+This transports the inclusive code from the definition closure completely 
+and removes the race condition between the attempts by index to 
+refer to module definitions and the module's attempts to laterally 
+access each other's definitions through the common reference.

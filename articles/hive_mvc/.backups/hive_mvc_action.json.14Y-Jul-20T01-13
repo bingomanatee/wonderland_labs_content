@@ -1,0 +1,12 @@
+{
+    "file_name": "hive_mvc_action",
+    "title": "hive-mvc-action: the next generation of Hive",
+    "intro": "Hive is not compatible with Express v. 4.0; to bridge that gap some of the features of hive-mvc have been incorporated into a new smaller module, hive_mvc_action",
+    "revised": "2014-07-20 01:13",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "hive_mvc",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

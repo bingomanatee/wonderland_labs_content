@@ -1,0 +1,553 @@
+Although only TMSAPI data has first-run films, both data sources have a place; it would be a good idea to create s REST service that combines both data sources. 
+
+Looking at both sources they have the same fundamental fields: 
+
+* title
+* description(s)
+* venue data 
+* time(s)
+
+Lets create a unified data source with records, storing the source and presentation records separately.
+
+We will do this in postgres to normalize the results fully and allow for faster queries. 
+
+The first result is the creation of two tables, and a [PostGres module](https://github.com/node-hive/pg-helper) to improve the ease with which data/tables are created and retrieved in PostGres. 
+
+The first table, **events**, has basic title, description, etc., data on an event. The second one, **event_times**, has the time and venue of the event. (hopefully a future **venues** table will expand on the venue information. 
+
+Next, a model class is created with some higher level methods to add and access this postgres data. At this point, we call the creation methods from inside the existing tmspi_model every time an API call is retrieved. (future versions will bring this in at the eventful level as well). 
+
+#### event_tables_model.js
+
+this helper uses the `pg-helper` module to construct tables programmatically, and a combination of programmatic and templated queries to retrieve the data. 
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var request = require('request');
+var crypto = require('crypto');
+var _DEBUG = false;
+var pg_helper = require('pg-helper');
+var async = require('async');
+var moment = require('moment');
+
+/* ------------ CLOSURE --------------- */
+
+// long movie title:
+//Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb
+
+function _compress_events(results) {
+    var tally = [];
+
+    var by_id = _.groupBy(results.rows, 'id');
+    _.each(by_id, function (rows, id) {
+        var out;
+
+        rows.forEach(function (grouped_row) {
+            if (!out) {
+                out = _.clone(grouped_row);
+                out.times = [];
+
+            }
+            var time = _.pick(grouped_row, 'start_time', 'stop_time', 'all_day', 'area', 'venue_id', 'venue_name');
+            if (time.start_time) time.start_time = new moment(time.start_time).format('YYYY-MM-DDTHH:mm');
+            if (time.end_time) time.end_time = new moment(time.end_time).format('YYYY-MM-DDTHH:mm');
+            out.times.push(time)
+
+        });
+
+        if (out) {
+            tally.push(out);
+        }
+    });
+
+    return tally;
+}
+
+
+var _EVENT_ID_TIME_JOIN = _.template('SELECT e.id, e.title, e.source, e.description, e.summary, e.html, e.repeating, e.category, e.area, t.start_time, t.stop_time, t.all_day, t.venue_name, t.venue_id' +
+    ' FROM events e LEFT JOIN event_times t ON t.event_id = e.id' +
+    ' WHERE e.id=\'<%= id %>\'' +
+    ' ORDER BY e.id, t.venue_id, t.start_time;');
+
+/* -------------- EXPORT --------------- */
+
+module.exports = function (apiary, cb) {
+
+    var events_table = new pg_helper.Table('events', apiary.get_config('db'))
+        .add('id', 'varchar', 64, ['PRIMARY KEY'])
+        .add('title', 'varchar', 64)
+        .add('source', 'varchar', 64)
+        .add('poll_date', 'timestamp')
+        .add('description', 'text')
+        .add('summary', 'text')
+        .add('html', 'boolean')
+        .add('repeating', 'boolean')
+        .add('start_time', 'timestamp')
+        .add('end_time', 'timestamp')
+        .add('all_day', 'boolean')
+        .add('category', 'varchar', 64)
+        .add('venue_name', 'varchar', 64)
+        .add('venue_id', 'varchar', 64)
+        .add('area', 'varchar', 16);
+
+    var event_times_table = new pg_helper.Table('event_times', apiary.get_config('db'))
+        .add('event_id', 'varchar', 64)
+        .add('venue_id', 'varchar', 64)
+        .add('venue_name', 'varchar', 64)// denormalizing the venue name for expedience.
+        .add('start_time', 'timestamp')
+        .add('stop_time', 'timestamp')
+        .add('area', 'varchar', 16)
+        .add('all_day', 'boolean', 0, ['DEFAULT FALSE']);
+
+
+    var model = {
+        name: 'event_tables',
+
+        event: function (id, finish) {
+            events_table.connect(function (err, client, done) {
+                var q = _EVENT_ID_TIME_JOIN({ id: id});
+                client.query(q, function (err, results) {
+                    done();
+                    if (err) {
+                        finish(err);
+                    } else {
+                        finish(null, _compress_events(results)[0]);
+                    }
+                })
+            });
+        },
+
+        summary: function (category, area, finish) {
+            events_table.connect(function (err, client, done) {
+                var query = {
+                    fields: ['id', 'title', 'summary', 'category'],
+                    terms: {where: util.format('category = \'%s\' AND area = \'%s\'', category, area)}
+                };
+                events_table.select(client, query, function (err, result) {
+                    console.log('summary of cat %s, zip %s: result %s',
+                        category, area, util.inspect(result.rows.slice(0, 4))
+                    );
+                    done();
+                    if (err) {
+                        finish(err);
+                    } else {
+                        finish(null, result.rows);
+                    }
+                });
+            })
+        },
+
+        load_tmsapi_tables: function (input, finish) {
+            console.log('loading tmsi tables from data %s', util.format(input.slice(0, 4)));
+            events_table.connect(function (err, client, done) {
+                if (err) {
+                    return finish(err);
+                }
+                var date = new Date();
+
+                var add_event_queue = async.queue(function (event, event_queue_callback) {
+
+                    var record = {
+                        id: event.tmsId,
+                        source: 'tmsapi',
+                        title: event.title,
+                        poll_date: date,
+                        description: event.longDescription,
+                        summary: event.shortDescription,
+                        html: false,
+                        category: 'movie',
+                        repeating: true,
+                        area: '94103'
+                    };
+
+                    events_table.insert(client, record, ['id'])
+                        .then(function (result) {
+                            var showtime_queue = async.queue(function (time, callback) {
+                                event_times_table.insert(client, {
+                                    event_id: event.tmsId,
+                                    venue_id: time.theatre.id,
+                                    venue_name: time.theatre.name,
+                                    start_time: time.dateTime,
+                                    area: '94103'
+                                }).then(function (result) {
+                                        callback();
+                                    }, function (err) {
+                                        console.log('time error: %s', err);
+                                        callback(err);
+                                    });
+                            }, 5);
+
+                            showtime_queue.drain = event_queue_callback;
+                            showtime_queue.push(event.showtimes);
+
+                        }, function (err) {
+                            console.log('err: %s', err);
+                            callback(err);
+                        });
+
+                }, 10);
+
+                add_event_queue.push(input);
+
+                add_event_queue.drain = function (err) {
+                    finish(err);
+                };
+
+            });
+        },
+
+        select: function (client, query, cb) {
+            return events_table.select(client, query, cb);
+        },
+
+        connect: function (cb) {
+            events_table.connect(function (err, client, done) {
+                if (err) {
+                    console.log('ERROR CANNOT CONNECT TO DATABASE');
+                    cb(err);
+                } else {
+                    cb(err, client, done);
+                }
+            });
+        },
+
+        truncate: function (client, cb) {
+            events_table.truncate(client, function () {
+                event_times_table.truncate(client, cb);
+            })
+        }
+    };
+
+    // initializing tables, indices; may error out after first run
+    model.connect(function (err, client, done) {
+        event_times_table.create(client, function (err, result) {
+            console.log('creating table event times: %s, %s', err, result);
+            events_table.create(client, function (err, result) {
+                console.log('creating table events: %s, %s', err, result);
+                client.query('CREATE INDEX idx_area_cat ON events (area, category);', function () {
+                    client.query('CREATE INDEX idx_events ON event_times (event_id);', function () {
+                        done();
+                        cb(null, model);
+                    });
+                });
+            });
+        });
+    })
+};
+
+```
+
+## RESTing Easy
+
+Its a very quick step to create a REST endpoint around this data;
+
+#### /frames/events/hives/rest/actions/events/events_action.js
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+/* ------------ CLOSURE --------------- */
+
+/* -------------- EXPORT --------------- */
+
+module.exports = {
+
+    on_validate: function (context, done) {
+        done();
+    },
+
+    on_input: function (context, done) {
+        var model = this.model('event_tables');
+        if (context.id){
+            model.event(context.id, function(err, event){
+                if (err) return done(err);
+                context.$send(event, done);
+            })
+        } else {
+            model.summary(context.category, context.zip, function (err, results) {
+                if (err) return done(err);
+                context.$send(results, done);
+            });
+        }
+    },
+
+    on_process: function (context, done) {
+        done();
+    },
+
+    on_output: function (context, done) {
+        done();
+    }
+}
+
+```
+
+### /frames/events/hives/rest/actions/events/events_config.json
+
+``` json
+
+{
+    "routes": {
+        "get": ["/rest/event", "/rest/event/:id"]
+    }
+}
+
+```
+
+## Angling for success
+
+The home page is then given a jolt in the arm. Our many REST endpoints: 
+
+* `/rest/event_types`
+* `/rest/locations`
+
+...allow us to bring in data at the client side point to define a menu for combined locations/event types. At this point we are limiting event types to movies. 
+
+First we bring in angular resources to our javascript, using [hive_layout](https://github.com/node-hive/hive_layout)'s javascript helpers and the configuration file. As well we add references to the angular action and controller we will use to make the page dynamic. 
+
+#### /frames/main/hives/main/actions/home/home_config.json
+
+note that the context property will put all the includes at the foot, and defer uses the script defer tag to allow the page to load without many of these scripts. (some grunt work will be done at some point to unify these many scripts.)
+
+``` json
+
+{
+    "routes": {
+        "get": "/"
+    },
+    "static": {
+        "js": "/js/home",
+        "css": "/css/home",
+        "img": "/img/home"
+    },
+    "javascript": [
+        {
+            "url": "/js/home/vendor/underscore-min.js",
+            "context": "foot",
+            "defer": "true",
+            "name": "underscore"
+        },
+        {
+            "url": "/js/home/vendor/angular/angular.min.js",
+            "context": "foot",
+            "defer": "true",
+            "name": "angular"
+        },
+        {
+            "url": "/js/home/vendor/angular/angular-resource.min.js",
+            "context": "foot",
+            "defer": "true",
+            "name": "angular-resource",
+            "requires": ["angular"]
+        },
+        {
+            "url": "/js/home/angular/app.js",
+            "context": "foot",
+            "requires": ["angular"],
+            "defer": "true",
+            "name": "app"
+        },
+        {
+            "url": "/js/home/angular/controller.js",
+            "context": "foot",
+            "defer": "true",
+            "requires": ["angular", "app", "underscore"]
+        }
+
+
+    ]
+}
+
+```
+
+The angularized home page template now looks like this:
+
+#### /frames/main/hives/main/actions/home/home_view.html
+
+``` html
+v ng-app="paApp">
+    <div ng-controller="paHomeCtrl" ng-cloak id="paHomeCtrl">
+
+        <h1>Welcome to the Passive Agressive Events Listing!</h1>
+
+        <p>Select your location: {{ foo }}</p>
+
+        <button ng-repeat="loc in locations" class="btn btn-large locationButton {{loc.code}}"
+                ng-show="show_loc_button(loc)"
+                ng-click="set_loc(loc)"
+                title="within 100 miles of zip code {{ loc.zip }}">{{ loc.name }}</button>
+        <button ng-show="location" class="btn btn-warning all-locations" ng-click="all_loc()">All Locations</button>
+
+        <div ng-show="event_buttons.length && location">
+
+            <h2>Events in {{location.name }}:</h2>
+
+            <p>Choose which events to view:</p>
+
+            <button ng-repeat="eb in event_buttons" class="btn event-{{eb.event_type.id}}"
+                    ng_click="view_events(eb)"
+                    title="{{eb.event_type.label}} within 100 miles of zip code {{ eb.location.zip }}">
+                {{eb.event_type.label}} in {{eb.location.name }}
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+```
+
+And gives us a dynamic way to select a combination of location and events based on some REST data:
+
+![pa_angular_index.png](/blog_image/pa_angular_index.png)
+
+clicking on a location button gives you 
+
+![pa_ai_2.png](/blog_image/pa_ai_2.png)
+
+In the future, there will be more than one button on the second screen for multiple event types when the eventful data is brought in. 
+
+The controller that drives this UI is very slim:
+
+####
+
+``` javascript /frames/main/hives/main/actions/home/static/js/angular/controller.js
+
+(function(window){
+
+    var _event_url = _.template('/events/view/<%= event_type.id %>/<%= location.zip %>');
+
+    function paHomeCtrl($scope, Locations, EventTypes){
+        $scope.foo = 'bar';
+
+        $scope.locations = Locations.query();
+
+        $scope.location = null;
+
+        $scope.event_types = EventTypes.query();
+
+        $scope.event_type = null;
+
+        $scope.show_loc_button = function(loc){
+            return (!$scope.location) || $scope.location.zip == loc.zip;
+        }
+
+        $scope.set_loc = function(loc){
+            $scope.location = loc;
+        };
+
+        $scope.all_loc = function(){
+            $scope.location = null;
+        };
+
+        $scope.event_buttons = [];
+
+        function refresh_ebs(){
+            if ($scope.location
+                && $scope.event_types && $scope.event_types.length){
+                $scope.event_buttons = _.map($scope.event_types, function(et){
+                    return {
+                        location: $scope.location,
+                        event_type: et
+                    }
+                })
+            }
+        }
+
+        $scope.$watch('location', function(loc){
+            refresh_ebs()
+        })
+
+        $scope.view_events = function(ed){
+            document.location = _event_url(ed);
+        }
+    }
+
+    angular.module('paApp').controller('paHomeCtrl', paHomeCtrl);
+})(window);
+
+```
+
+for brevity, the boilerplate application/rest resource definition is not shown -- see the repo for details. 
+
+## The Events page
+
+The former events page was full-backend-template driven and heavy - over 6 MB of markup. 
+
+By bringing in angular, we can bring in a more select set of data for events - title, ID, summary -- and wait to get listing data for when the user clicks on a movie.
+
+![events_angular.png](/blog_image/events_angular.png)
+
+Unlike the backend-templated version, the page loads before getting ANY data about the event listing -- that data is brought in via AJAX in the angular controller:
+
+#### /frames/events/hives/main/actions/events_view/static/js/controller.js
+
+``` javascript
+
+(function (window) {
+
+    function paEventsCtrl($scope, Locations, EventTypes, Events, $window) {
+        $scope.zip = $window._pa_search_query.zip;
+        $scope.category = $window._pa_search_query.category;
+
+        $scope.locations = Locations.query();
+
+        $scope.$watch('locations', function (locations) {
+            $scope.location = _.find(locations, function (l) {
+                return l.zip == $scope.zip;
+            })
+        }, true);
+
+        $scope.location = null;
+
+        $scope.event_types = EventTypes.query();
+
+        $scope.search_term = {};
+
+        $scope.events = Events.query($window._pa_search_query);
+
+        $scope.$watch('event_types', function (event_types) {
+            $scope.event_type = _.find(event_types, function (et) {
+                return et.id == $scope.category;
+            })
+        }, true);
+
+        $scope.place_label = function(){
+            return $scope.location ? $scope.location.name : $scope.zip;
+        }
+
+        $scope.category_label = function(){
+            return $scope.event_type ? $scope.event_type.label : $scope.category;
+        }
+
+        $scope.expand_event = function(event){
+            event.expand = !event.expand;
+            Events.get(event.id, function(event_data){
+                _.extend(event, event_data);
+            })
+        }
+
+        $scope.event_text = function(event){
+            return _.compact([event.description, event.summary, ' -- no description available --'])[0];
+        };
+
+        $scope.close_event = function(event){
+            event.expand = false;
+        }
+
+    }
+
+    angular.module('paApp').controller('paEventsCtrl', paEventsCtrl);
+})(window);
+
+```
+
+<iframe width="420" height="315" src="//www.youtube.com/embed/cPfPsFFuY0Y" frameborder="0" allowfullscreen></iframe>

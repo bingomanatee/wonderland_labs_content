@@ -1,0 +1,12 @@
+{
+    "file_name": "geosphere",
+    "title": "The GeoSphere Module",
+    "intro": "a module for managing geographical data using a tessellated dodecahedron as the basis for geographic data and proximity networks",
+    "revised": "2013-07-07 04:26",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": true,
+    "folder_homepage_weight": 0
+}

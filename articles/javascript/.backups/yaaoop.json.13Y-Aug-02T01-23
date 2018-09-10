@@ -1,0 +1,12 @@
+{
+    "file_name": "yaaoop",
+    "title": "Yet Another Article on Javascript OOP",
+    "intro": "There is always a bit of \"conversion shock\" from classical to javascript based objects. Here's another stab ad laying out \"the rules\"",
+    "revised": "2013-08-02 01:23",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "javascript",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

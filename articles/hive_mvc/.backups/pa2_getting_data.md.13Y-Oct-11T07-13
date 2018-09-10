@@ -1,0 +1,5 @@
+In ?[a previous article](passive_aggressive) we setup a basic Hive-MVC site, and hosted it on Heroku. 
+
+Up to now our site is basically a static frame; other than the layout wrapper there's little need to use node (or any backend system) at all because our site is not data driven. 
+
+We will change that here by giving our site a reason to live: to get data on movies by blending fandango and IMDB in interesting and novel ways.

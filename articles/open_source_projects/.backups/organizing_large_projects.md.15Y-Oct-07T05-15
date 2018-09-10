@@ -1,0 +1,44 @@
+There are a few recurring patterns that I've found for managing large scale projects that make them easier to develop and grow. 
+
+## 0. Understand the media requirements
+
+The browser is no longer the only media to target and even when it was, there were multiple browsers with a range of limitations all their own.
+
+Now, with mobile and tablets being a major part of the marketplace, responsive concerns are a significant part of the design process and should influence design and process modelling from the start. 
+
+## 1. Create and model clear state changes
+
+Understanding the state of the application and its components is critical to keeping large products under control. This includes modelling the security concerns into the state.
+
+* Which states are enterable without security access (public/anonymous)
+* Which level of security must be achieved to enter in specific states
+* What the pattern of traversal of states is - linear, random access, hierarchical. 
+* How does the creation or modification of data add or change the availability of states
+* What events should be triggered when specific states are engaged
+* Are there more than one dimensions of state or are all states contained within a unified model
+
+I personally use the Javascript State Machine to model states; it has good eventing, can be merged into existing classes, and easily visualizes the traversal rules. 
+
+## 2. Leverage UI libraries to reduce technical debt 
+
+With the wealth of libraries available, there should be no reason to design a custom widget for mundane elements like dropdowns and buttons. I find Semantic UI to be a great time saver; other engines like Twitter Bootstrap, Cordova and Pure are great timesavers for design and layout. 
+
+Understand the strengths and limitations of your chosen libraries before beginning UI design. Its easier to use customized variations of stock UI tools when the designers understand their UI palette and design with use of your resources in mind from the start. 
+
+## 3. Use structured UI middleware to manage modular development
+
+Being able to organize, reuse and test your code is key to scaling development. There are many modular development engines including
+
+* Angular 
+* React
+* Ember
+* Require
+* Meteor
+
+Each of which provides some flavor of modularity; most resemble the CommmonJS model of compartmental code. 
+
+Scaling development by definition includes regression concerns. While developing components, its crucial to understand how, in testing, the components inputs from their behavior. This means
+
+* isolating direct REST polling to external libraries that can be replaced with test input 
+* isolating access to system resources (window, document, DOM) from the testable components like state machines and business logic routers
+* using MVC patterns to ensure that business logic executes in its own scope.

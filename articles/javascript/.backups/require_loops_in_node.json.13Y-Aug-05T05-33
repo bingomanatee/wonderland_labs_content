@@ -1,0 +1,12 @@
+{
+    "file_name": "require_loops_in_node",
+    "title": "Require Loops in Node: the Farnsworth Paradox",
+    "intro": "Its easy to create require paradoxes in Node. Fortunately, also easy to resolve them.",
+    "revised": "2013-08-05 05:33",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "javascript",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

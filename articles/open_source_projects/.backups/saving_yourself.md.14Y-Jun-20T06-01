@@ -1,0 +1,23 @@
+One of the problems with best practice, test-driven programming is that there is that uncomfortable state where you work is not passing tests but you want to back it up because you have reached some sort of "personal benchmark". What do you do to preserve your work?
+
+The evil devilspawn that is the modern hard drive is part of the problem. I don't trust it. I have about eight of them I've backed stuff up on and they are all failed at this point. The only thing a HD is good for is to enable a Time Machine (an OSX backup system built in to the operating system) and that isn't my favorite pet at this point either -- it is very poorly designed in that you can't exclude apps which nowadays are the least important files in your computer yet take up a lot of the space. 
+
+So when it comes to saving your work without polluting the Git repos with bad code what are your options?
+
+## 1. A Secondary Backup System
+
+Using not-git to save your work has its pros and cons. Git is of course *versioned* so you can save the current state of your code AND see the history of updates back to day one. Most other backup systems don't have this advantage. 
+
+Here are the qualities I like in a backup engine:
+
+1. **passive** -- Its Murphy's law that any system that forces you to take action to back up your files results in your forgetting to back them up right when you are "hot" in a work run -- and your work is most likely to need backup!
+2. **versioned** -- My great hatred of most DB systems and backup engines is they only save the latest state. One of the most common scenarios of backup retrieval is when you code down a bad road and want to take the path not taken. Saving the latest version doesn't give you that option. 
+3. **remote** -- Saving to your computer has two great problems: you can't "Machine hop" or share your code over the web, and you risk losing work if your computer HD (or computer) is lost, stolen or damaged. Remote systems give you the most options. 
+4. **branch friendly** -- no system passes this test; ideally you want to view your code back in time, *relative to each branch.* The only real way to keep this standard is to use git-based backups. 
+
+* **Time Machine** is the only *passive*, *versioned*, *remote* backup system I know of. One of the downsides, though, is that IT decides when to back up your files. 
+* **JetBrains IDEs** is *passive* and *versioned* but not *remote*. However it it s great saver of recent updates and allows you to view whole project state at any given point. Besides its lack of remoting /branch friendly history it is the most fantastic backup system imaginable. 
+* **DropBox** is *passive* and *remote*. and if you don't get piggish with tons of resource files, freeish. But it is definitely not versioned. 
+* **(various web backup services)** There are a ton of web backup services. 
+
+*A note for the tinfoil hat crowd:* In today's troubled times, there is no such thing as a guarantee of privacy for backup systems -- in fact there is an almost guarantee that your data WILL be shared with a remote backup system. I don't have any great fix in this area, just a warning.

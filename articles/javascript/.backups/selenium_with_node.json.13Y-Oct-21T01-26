@@ -1,0 +1,12 @@
+{
+    "file_name": "selenium_with_node",
+    "title": "Driving Selenium with Node",
+    "intro": "You don't have to defect to Java or Ruby to run Selenium tests. A step by step",
+    "revised": "2013-10-21 01:26",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "javascript",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

@@ -1,0 +1,12 @@
+{
+    "file_name": "there_is_no_model",
+    "title": "Domain Modelling for TDD",
+    "intro": "Angular does a lot --- and this can fool you into thinking that it is a 360 degree system. But it does not automatically solve the business object paradigm and using its components as if they were business objects is a formula for failure.",
+    "revised": "2016-02-16 09:45",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "angular",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

@@ -1,0 +1,12 @@
+{
+    "file_name": "planet",
+    "title": "Planets",
+    "intro": "the core class for GeoSphere",
+    "revised": "2013-08-04 05:42",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

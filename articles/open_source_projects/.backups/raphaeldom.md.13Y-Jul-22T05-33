@@ -1,0 +1,186 @@
+<a href="https://github.com/bingomanatee/raphaelDOM"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+
+There are two basic coordinate systems underpinning most SVG/Canvas drawing tools:
+
+1. **absolute** -- that is, specifying pixel by pixel where you want your objects to go to.
+2. **transformational** defining a hierarchy of centers, transforms, rotates and scaling of target coordinates. 
+
+The web introduces a third set of coordinate systems in DOM: **percentage** coordinates; that is, each box's position, width and height can be defined as absolute or percentages of the container. I say "system" but in reality, the system is very "gappy" -- you can't easily center one object relative to another, for instance. 
+
+Percentage based calculus is very useful in many situation where you don't know the bounding objects' coordinate system. 
+
+RaphaelDOM overlays a coordinate system based on percentages over the Raphael SVG drawing system. 
+
+Here is an example of raphaelDOM in action: 
+
+<iframe width="80%" style="margin: 2em" height="800" src="http://jsfiddle.net/bingomanatee/kD9Rf/embedded/result,js" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+the draw method is tied to a resize listener, but the dimensions are all calculated based on internal subdivisions of the containing `div` element. 
+
+## The raphaelDOM resources
+
+the raphaelDOM library creates an extended set of classes, all of which are included in the raphaelDOM object. This object has the following classes:
+
+* **raphaelDOM.Box** the primary class for creating organized trees of objects. Each Box is mapped to a single Raphael element; when drawn, that element is attached to the box.element property. 
+* **raphaelDOM.Rect** an immutable representation of an absolute rectangular region in the paper's panel. 
+* **raphaelDOM.Dimension** defines a representation of a four-sided offset; used to represent margins and padding of a given Box instance.
+* **raphaelDOM.draw** defines the rendering methods of various drawTypes of boxes. You can extend the drawing vocabulary by adding render functions to this collection. 
+* **raphaelDOM.utils** is a collection of methods for internal utility.
+
+## raphaelDOM.Box
+
+The basic building blocks of raphaelDOM are boxes. A box is a region of the containing panel, and can be nested.
+
+When the root Box's `draw()` method is called, an SVG element is added to the page whose dimensions and appearance build from the Box's appearance, and the draw type that the Box has been set to. 
+
+### Constructor(name, configuration, parent, paper);
+
+Creating a box uses the `new` method, though once you have your root box, you'll probably want to use the `child()` factory off of the base (or other child) boxes.
+* **name** is a string. It also becomes the default title of the object if title is not explicitly set. 
+* **configuration** is an object; most properties -- width, anchor, drawType -- can be specified in configuration, or via post-creation set- methods.
+* **parent** can be another box or a DOM element. 
+* **paper** is a Raphael element; if absent, will be inherited from a parent box. 
+ 
+#### Width and Height
+
+Each box has a width and height that is either absolute or a percent string(`'33%'`) based on its containing Box or DOM element. 
+
+``` javascript
+var box = new raphaelDOM.box('root box', {}, $('my-div'), paper).setWidth(300).setHeight('50%');
+```
+A boxes' default size is 100% width and height. 
+
+### Anchoring
+
+Unlike HTML DOM which allows for pushing to the right and left, RaphaelDOM allows you to create boxes that expand outwards from any of eight points relative to the boxes' parent. 
+
+#### box.setAnchor(string)
+
+Each box's position is relative to how it is "anchored" to the parent Box/Dom element. Possibilities include:
+
+* **TL** (top left) the default anchor position
+* **T** (top center) 
+* **TR** (top right)
+* **L** (left middle)
+* **C** (centered)
+* **R** (right middle)
+* **BR** (bottom right)
+* **B** (bottom center) 
+* **BL** (bottom left)
+
+Anchor comes into play when you reduce/increase width or height or margin, or the parent has padding. As a box shifts or shrinks, it does so relative to the anchor point. 
+
+<iframe width="100%" height="400" src="http://jsfiddle.net/bingomanatee/GZL6E/embedded/result,js" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+### Margin and Padding
+
+Margin and Padding can be set to a single value, or you can set Margin and Padding separately for each side. 
+Margin is how you position the box relative to a corner of the parent, without resizing it. 
+
+Padding is how you inset the position and size of child boxes of a box, relative to the box's size. If the child has percentage based height and width, its dimensions will be based on the inner boundaries. Padding insets all four sizes of the containing inner rectangle of child elements, regardless of the anchor. 
+
+#### box.setMargin(measure)
+#### box.setLeft|Right|Top|BottomMargin(measure)
+#### box.setPadding(mesure)
+#### box.setLeft|Right|Top|BottomMargin(measure)
+
+Margins and padding reduce (or increase!) the box's dimensions. 
+* **margin** offsets the box relative to the parent's inner width and inner height. When you set margin, the box's width and height will NOT be automatically reduced -- you will have to adjust the width/height yourself if you want it to be contained within its parent. Also, Margin is only relative to the box's `anchor` (see below), and sets the box's position relative to a combination of the anchor point of the parent and the margin.
+* **padding** determines the width and height of the "inner rectangle", relative to its own size.  A box with no child boxes won't be affected by changing its padding. All child elements of a box will be anchored to, and scaled to, the dimensions of this inner rectangle, creating a "Picture frame" effect.  
+
+<iframe width="100%" height="600" src="http://jsfiddle.net/bingomanatee/9Cxsx/embedded/result,js" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+Since Margin is always an offset from the `anchor` of the box, only the margins adjacent to the anchor point will affect the position of a box, not its width or height. For instance, if you set a 10% margin on all four sides of a box anchored to the TL corner of its parent, you'd want to set width and height to 80% if you want the box to be evenly framed in its parent.
+
+On the other hand, if you  set a parent's padding to 10%, a child with 100% width and height would be evenly framed in its parent. 
+
+<iframe width="100%" height="400" src="http://jsfiddle.net/bingomanatee/VZ3XJ/embedded/result,js" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+Note that margin and padding DO NOT interact in the same way in RaphaelDOM as they do in browser DOM. In browser DOM margin is actually offset against the outer rectangle, on the inner rectangle, of the parent, and always affects all four sides of a box; also, padding and margin can overlap and affect each other. 
+
+In RaphaelDOM, there are clear boundaries between a box, the inner box that is created by padding the box, and the margin which offsets a box against its parents' inner box. Padding and Margin don't directly interact with each other or overlap.
+
+### Draw Modes
+#### box.setDrawType(string)
+
+There are several built-in primitive rendering techniques you can leverage: 
+
+* **rect** -- draw a rectangle to the size of the box
+* **circle** -- draw a circle inside the box. If width and height are different, the radius will either be half the smallest side (if `box.radMode -- 'min'`, the default system), half the largest side ('max') or half the average of the box sides ('mean'). 
+* **wedge** -- draw a "pie segment" of a circle. Requires a `startAngle` and `endAngle` property to be set -- in degrees. 
+* **text** --  write text from the anchor outwards. Will not wrap. 
+* **grid** -- creates a series of boxes. 
+* **path** -- draws a shape by connecting points in the point array of the box. 
+* **none** -- does not create or render a draw element; useful if you want to create boxes for positional reference, but don't want to draw a shape to its dimensions. 
+
+Grid has a host of properties: 
+
+* **columns** and **rows** -- the divisions (whole positive integers) of the grid. 
+* **rowMargin** and **colMargin** -- the separation between the grid's cells. Does not affect the outside margins of the cells relative to the box. 
+* **processCell** -- an optional `function(cell, column, row)` that accepts the cell as an argument; it executes after the cells' dimensions have been set but before it has been drawn, so its drawType and other properties can be changed. You can even set the drawType to 'none' to prevent a cell from rendering. 
+* **setRowHeight(params)**, **setColWidth(params)**, **setRowMargin(params)**, **setColumnMargin(params)** are optional functions that must return a number / percentage value, based on the current state and row and column index.
+
+<iframe width="100%" height="600" src="http://jsfiddle.net/bingomanatee/rK28k/embedded/result,js" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+Point requires you add points to the box before drawing it:
+
+<iframe width="100%" height="700" src="http://jsfiddle.net/bingomanatee/fLPSK/embedded/result,js" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+### id
+
+Each box created in a given page gets an autocreated ID -- an integer. 
+
+### Paths
+
+The path of a box is similar to the full path of a file in a series of folders: it is a concatenation of the name of the box and the names of all the parent boxes. 
+
+#### box.getPath()
+
+returns the hierarchical name of the box -- a concatenation of all the names between and including the root box and this one, joined by ','. getPath is used to match elements for the purposes of `blend()`ing boxes (see below).
+
+#### box.getPathID()
+
+returns the hierarchical name of the box, including the box ID in the pathname. Useful for debugging uniqueness of boxes. 
+
+#### box.rect()
+
+Rect produces an immutable record that represents the absolute size and position of the box. Its properties -- `left`, `top`,`right`, `bottom`, `width`, `height` -- are set upon execution of `box.rect()` and do not update if you change the properties of the box. A box's rect is the end product of all of a box's parents' dimensions and padding, and the box's width, height and margins. 
+
+The rect does have a few methods for calculated positions: 
+
+* ** radius ** -- the basis for drawing `circles` and `wedges`
+* ** radialPoint(angle, radialScale)** -- returns a radial point (`{x: int, y: int}`) relative to the center of the box and the input radial coordinates. 
+* ** inset ** -- returns a second rectangle inset by the input Dimension.
+* ** outset ** -- returns a second rectangle expanded by the input Dimension. 
+
+### Colors
+
+#### box.setColor(r, g, b), box.setStrokeColor(r, g, b)
+
+sets the fill or border color of a shape. 
+
+### Drawing
+
+#### box.draw()
+
+Drawing the boxes of a raphaelDOM structure is not automatic. It occurs when a root boxes' draw() method is called. Drawing combines the drawAttrs properties of the box with the color and strokeColor colors of the box and renders the primitive that corresponds with the drawType of the box. 
+Draw creates Raphael Elements for this box and all its' descendants. The elements are attached to the box's `element` property. Draw is a One-off method; if you want to animate/manipulate/transform the elements post-creation, you must use Raphael to directly alter the elements, or erase and redraw the entire SVN structure.
+
+Note if you want to, you can override the draw method of a box and use whatever Raphael techniques you need to create the shapes you want.
+
+### Blending
+
+#### raphaelDOM.blend(box1, box2, time, easing, callback)
+
+Raphael has the ability to animate transitions to a new attribute manifest. RaphaelDOM allows you to blend all analogous elements between two box collections over time, ending with a complete swapout between box1 and box2. 
+
+An element is considered analogous between the two boxes if the path of the element exists in both box1 and box2 (see getPath);
+
+<iframe width="100%" height="700" src="http://jsfiddle.net/bingomanatee/Lusss/embedded/result,js" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+<caption>Click on the "result" link above to see the blend in action</caption>
+
+The box elements of box1 which are not analogous in box1 and box2 are faded while the analogous elements blend. Box elements of box2 that are unique are only shown at the end of the animation. 
+
+# Using raphaelDOM for non raphael/SVG drawing
+
+At its core, raphaelDOM defines regions in a 2d drawing space. You can use this if you want to divide up regions in any 2D drawing system -- canvas, HTML, PostScript, etc. All you need to do is define `raphaelDOM.draw` methods that produce the kind of results you want and harvest the 'box.rect()' data for your own rendering system.

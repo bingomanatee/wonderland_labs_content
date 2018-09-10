@@ -1,0 +1,39 @@
+If you run a React generator you will find that the output of the site to be oriented towards a site at the root of your domain. But github pages publishes the site into a path of the pattern `https://__user__.github.io/__reponame__/`. Augmenting your code to work in this context takes a lot of work and screwing around. Here are a few pointers to speed up the process of preparing your site to work in a subfolder:
+
+## change any references in your index.html page to be relative
+
+`<link rel="stylesheet" href="mycss.css"/>` is identical to `<link rel="stylesheet" href="/mycss.css"/>`  (note the slash or absence of slash in front of `mycss.css`) when index.html is in the root but when the root is in `...github.io/__reponame__` will evaluate to `https://...github.io/mycss.css`, which is outside your repo contents. Inspect your index.html file for those sort of references and use relative pathing. You may find the `<base href="https://....github.io/__reponame__/" />` tag helpful for changing the assumed reference point of index.html globally. see [http://www.w3schools.com/tags/tag_base.asp](this page) for details on the `base` tag.
+
+## use `https` instead of `http`
+
+github pages is fairly strict about not mixing secure (https) and insecure(http) protocols; make sure to use the secure prefix wherever it appears in your code. 
+
+## Use a relative prefix in your route if you use react router
+
+This is one of the trickier bits; the react router allows you to nest prefixes to easily manage the `__reponame__`. In my very simple routing pattern, I had to transform 
+
+```` javascript
+
+export default (store) => (
+  &lt;Route path='/' component={CoreLayout}>
+    &lt;IndexRoute component={HomeView} />
+  &lt;/Route>
+);
+
+````
+
+to
+
+```` javascript
+
+export default (store) => (
+    &lt;Route path='/ridecell' component={CoreLayout}>
+        &lt;Route path="/">
+            &lt;IndexRoute component={HomeView}/>
+        &lt;/Route>
+    &lt;/Route>
+);
+
+````
+
+to enable my github pages site for a ridecell demo.

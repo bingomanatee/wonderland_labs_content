@@ -1,0 +1,12 @@
+{
+    "file_name": "huge_data_sets",
+    "title": "Managing Huge Data Sets in Angular",
+    "intro": "In a finance site I worked at your entire bank account transaction history was loaded into the client. here's how I made it performant.",
+    "revised": "2016-02-11 08:57",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "angular",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

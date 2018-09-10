@@ -1,0 +1,52 @@
+I always found "Prototypical" to be a very complex and overly glorified way of describing what Javascript does with the class model. I thought I would give a stab at breaking down the basics of how and why Javascript does instantiation the way it does. 
+
+## Some fundamental but very important concepts
+
+### Objects are Hashes. 
+
+Seems simple enough but getting this is vital to getting anything real done with Javascript. A hash is a set of name-value pairs -- basically a labelled keychain. In a deeper sense it is also a __namespace__ -- that is, for the object variable, each *value* is called *name*. 
+
+``` javascript
+var fred = {wife: 'Wilma', kids: 1, male: true, says: ['hey boo boo', 'yabba dabba doo']};
+console.log('Freds is male: ', fred.male, ' and his wife is ', fred.wife) // true, wilma
+
+var barney = {wife: Betty', kids: 1, male: true, says: []}
+console.log('Barney is male:, barney.male, ' and his wife is ', barney.wife) // true, betty
+
+// lets give Barney a sex change
+barney.male = false;
+console.log('Barney is male:, barney.male, ' and his very upset wife is ', barney.wife) // false, betty
+```
+
+The javascript's engine's task of finding the value of an object by key is pretty readable here. You have set these values in creation, and as shown for poor Barney, you can change them by setting the dot-reference.
+
+## Some "Power user" tricks
+
+### String key association
+
+You have a larger set of tokens available when naming object keys than is apparent by reading the docs (casually.) 
+
+* You can assign ANY name you can make a string out of a value, by using array syntax:
+
+``` javascript
+
+var barney = {};
+barney['favorite outfit'] = 'Ballerina costume';
+console.log('barney likes to wear a ', barney['favorite outfit']); // Ballerina costume
+```
+
+You can even assign numeric key-value association. The map will be to a string of a number, but with array access, that shouldn't be a problem.
+
+``` javascript
+
+var bedrock_citizens = {};
+
+bedrock_citizen[0] = 'Fred';
+bedrock_citizen[1] = 'Barney';
+bedrock_citizen[2] = 'Wilma';
+bedrock_citizen[3] = 'Betty';
+
+console.log('bedrock citizens: ' bedrock_citizen[0], bedrock_citizen['1'] ... ) // 'Fred', 'Barney'...
+```
+
+This does NOT endow an object with the features of an Array but in some circumstances, it might be more useful.

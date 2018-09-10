@@ -1,0 +1,236 @@
+I have recently fallen afoul of the React/Flux paradigm in an experiment involving logins, social data and Firebase, build on React (Specifically the (React Starter Kit)[https://github.com/kriasoft/react-starter-kit]). 
+
+The lifeCycle (bootup) methods of React components are twitchy about exactly when you can and cannot use setState to initialize your state. Worse, all the docs on React use factory based classes while I'm opting for es6 based class structures (i.e., actual classes) because I find them more readable. So I decided to reboot with a more rigorous TDD ground-up version using redux as the data pipe. 
+
+## Why Redux?
+
+I chose Redux largely based on star/following; other than Flux which has better press, Redux is the most followed system; also, it promises a more streamlined process in which as GladOS puts it, "Speedy thing goes in, speedy thing comes out." The centralization of the state object in Redux is also appealing from a testability POV. While I can in theory create totally independent stores for data silos, the ability to replay a troublesome scenario with all the data assumptions baked in is something I've been hunting for for a while. 
+
+## What went wrong the first time?
+
+There was a lot of pass-around of state between components, and that got messy fast. Also, there were a lot of collisions where the mixin added listeners for data. Often, there were data cascades in which listeners to dispatch themselves wanted to dispatch more data, which is not a good thing in React land. 
+
+Also fundamentally a lot of code got written without test coverage; tis last thing is what I wanted to fix the next time around. 
+
+## If it weren't for reboots, we wouldn't have Heath Ledger. 
+
+In doing the reboot, before I got lost in the visual layer I wanted a robust, validated structure around the dispatcher, with test coverage. Jest (a superset of Jasmine) is the flavor of test coverage that is documented around React; one of the benefits for it is that it lets you write tests in context with your components, in a __tests__ folder within the component layer. Less welcome, Jest autoMocks any component you don't specifically earmark as "not mocked". Also, the es6 module system doesn't seem perfectly seamless in Jest (which may have something to do with Babel, not Jest, but...)
+
+## Thats my version
+
+The codebases under discussion are rapidly developing; as I ran into issues I also forced the latest versions of Jest and Babel onto my stack. For reference, here is my resulting package.json.
+
+```` json
+
+{
+  "private": true,
+  "engines": {
+    "node": ">=4.1 <5",
+    "npm": ">=3.1 <4"
+  },
+  "dependencies": {
+    "babel-core": "5.8.25",
+    "classnames": "2.1.5",
+    "eventemitter3": "1.1.1",
+    "express": "4.13.3",
+    "fastclick": "1.0.6",
+    "fbjs": "0.3.1",
+    "flux": "2.1.1",
+    "front-matter": "1.0.0",
+    "history": "1.11.1",
+    "jade": "1.11.0",
+    "jest-cli": "^0.7.1",
+    "normalize.css": "3.0.3",
+    "react": "^0.14",
+    "react-dom": "0.14.0-rc1",
+    "react-routing": "0.0.4",
+    "redux": "^3.0.4",
+    "source-map-support": "0.3.2",
+    "superagent": "1.4.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^6.0.3",
+    "babel": "^6.1.5",
+    "babel-eslint": "^4.1.3",
+    "babel-loader": "^5.3.2",
+    "babel-plugin-react-transform": "^1.1.1",
+    "browser-sync": "^2.9.7",
+    "css-loader": "^0.19.0",
+    "csscomb": "^3.1.8",
+    "del": "^2.0.2",
+    "eslint": "^1.6.0",
+    "eslint-config-airbnb": "0.1.0",
+    "eslint-loader": "^1.0.0",
+    "eslint-plugin-react": "^3.5.0",
+    "file-loader": "^0.8.4",
+    "gaze": "^0.5.1",
+    "git-repository": "^0.1.1",
+    "glob": "^5.0.15",
+    "jest-cli": "^0.5.8",
+    "jscs": "^2.2.1",
+    "lodash.merge": "^3.3.2",
+    "mkdirp": "^0.5.1",
+    "ncp": "^2.0.0",
+    "postcss": "^5.0.8",
+    "postcss-cssnext": "^2.1.0",
+    "postcss-import": "^7.0.0",
+    "postcss-loader": "^0.6.0",
+    "postcss-nested": "^1.0.0",
+    "psi": "^1.0.6",
+    "react-transform-catch-errors": "^1.0.0",
+    "react-transform-hmr": "^1.0.1",
+    "redbox-react": "^1.1.1",
+    "replace": "^0.3.0",
+    "style-loader": "^0.12.4",
+    "url-loader": "^0.5.6",
+    "webpack": "^1.12.2",
+    "webpack-dev-middleware": "^1.2.0",
+    "webpack-hot-middleware": "^2.3.0"
+  },
+  "jest": {
+    "rootDir": "./src",
+    "scriptPreprocessor": "../preprocessor.js",
+    "unmockedModulePathPatterns": [
+      "fbjs",
+      "react"
+    ]
+  },
+  "scripts": {
+    "lint": "eslint src tools && jscs src tools",
+    "csslint": "csscomb src/components --lint --verbose",
+    "csscomb": "csscomb src/components --verbose",
+    "test": "eslint src && jest",
+    "clean": "babel-node --eval \"require('./tools/clean')().catch(err => console.error(err.stack))\"",
+    "copy": "babel-node --eval \"require('./tools/copy')().catch(err => console.error(err.stack))\"",
+    "bundle": "babel-node --eval \"require('./tools/bundle')().catch(err => console.error(err.stack))\"",
+    "build": "babel-node --eval \"require('./tools/build')().catch(err => console.error(err.stack))\"",
+    "deploy": "babel-node --eval \"require('./tools/deploy')().catch(err => console.error(err.stack))\"",
+    "serve": "babel-node --eval \"require('./tools/serve')().catch(err => console.error(err.stack))\"",
+    "start": "babel-node --eval \"require('./tools/start')().catch(err => console.error(err.stack))\""
+  }
+}
+
+```
+
+## The Desired Behavior part 1: basic user auth
+
+The first set of actions were basic auth. In this state model, distinction is made between user login (the *attempt* to log in*) and credential validation and rejection (set after an async response). 
+
+The final state model is: 
+
+```` javascript
+
+const USER_STATE_ANON = 'USER_STATE_ANON'; // no logged in user
+const USER_STATE_LOGIN_SUBMITTED = 'USER_STATE_LOGIN_SUBMITTED'; // user credentials submitted to server
+const USER_STATE_VALIDATED = 'USER_STATE_VALIDATED'; // server validates user credentials
+const USER_STATE_LOGIN_REJECTED = 'USER_STATE_LOGIN_REJECTED'; // server rejects user credentials
+
+````
+
+These states are achieved through the following actions:
+
+```` javascript
+{
+    logIn, // submits a user credential to the server; moves state to USER_STATE_LOGIN_SUBMITTED
+    logOff,  // resets any session; clears the user out and returns state to USER_STATE_LOGIN_REJECTED
+    logInGood, // upon server validation advances state to USER_STATE_VALIDATED
+    loginBad,  // upon server rejection, advances state to USER_STATE_LOGIN_REJECTED
+    loginResetAnon // resets state to USER_STATE_ANON 
+}
+
+````
+
+Only the login method has a data manifest (the users's username/password). The reason for the USER_STATE_LOGIN_REJECTED is that if the server spits back failure, the UX should change to tell the user to try again, potentially highlighting where the problem is.
+
+### Dynamic Behavior
+
+While the application layer can be charged with all actions, there is a fairly consistent auth pattern and in respect of that an Auth component was engineered. In the auth component an Authorizing function/promise is injected. When the login action is dispatched, the Auth layer automatically invokes the injected handler, and upon resolution/rejection, the logInGood/Bad method is dispatched. This is where things get interesting on the test level. 
+
+One bit of discovery is that Jest doesn't like timeouts much, so simulating an async callback from the server requires use of the `jest.runOnlyPendingTimers()` call. Here are the resulting tests:
+
+``` javascript
+
+jest.dontMock('./../Store');
+jest.dontMock('./../../actions/Actions');
+jest.dontMock('./../UserAuth');
+jest.dontMock('redux');
+jest.dontMock('./../State');
+
+var store = require('./../Store');
+var Actions = require('./../../actions/Actions');
+var UserAuth = require('./../UserAuth');
+
+describe('UserAuth', function () {
+    describe('promise based authentication: success', function () {
+        /**
+         * This scenario validates that if an injected promise-based auth method is employed,
+         * after you login, and after the promise resolve,
+         * the userState is promoted to validated.
+         */
+        var globalResolve;
+        beforeEach(function () {
+            // configure an always-authing API that waits for external resolution.
+            UserAuth.setUserValidation((user) => new Promise((resolve, reject) => {
+                globalResolve = resolve;
+            }), UserAuth.VALIDATION_METHOD_TYPE_PROMISE);
+            store.dispatch(Actions.logIn({user: 'bob'}));
+            globalResolve(true);
+        });
+
+        it('shifts the state to USER_STATE_VALIDATED eventually', function () {
+            // using a little async here to ensure that the "then" of logging in has time to execute.
+            var done = false;
+            waitsFor(() => {
+                jest.runOnlyPendingTimers();
+                setTimeout(() => {
+                    done = true;
+                }, 200);
+                return done;
+            });
+
+            runs(() => {
+                const loggedInState = store.getState();
+                expect(loggedInState.userState).toBe(Actions.USER_STATE_VALIDATED);
+            });
+        });
+    });
+    describe('promise based authentication: failure', function () {
+        /**
+         * This scenario validates that if an injected promise-based auth method is employed,
+         * after you login, and after the promise resolve,
+         * the userState is promoted to validated.
+         */
+        var globalReject;
+        const INVALID_REASON = 'bob is bad';
+        beforeEach(function () {
+            // configure an always-authing API that waits for external resolution.
+            UserAuth.setUserValidation((user) => new Promise((resolve, reject) => {
+                globalReject = reject;
+            }), UserAuth.VALIDATION_METHOD_TYPE_PROMISE);
+            store.dispatch(Actions.logIn({user: 'bob'}));
+            globalReject({error: INVALID_REASON});
+        });
+
+        it('shifts the state to USER_STATE_REJECTED eventually', function () {
+            // using a little async here to ensure that the "then" of logging in has time to execute.
+            var done = false;
+            waitsFor(() => {
+                jest.runOnlyPendingTimers();
+                setTimeout(() => {
+                    done = true;
+                }, 200);
+                return done;
+            });
+
+            runs(() => {
+                const loginRejectedState = store.getState();
+                expect(loginRejectedState.userState).toBe(Actions.USER_STATE_LOGIN_REJECTED);
+                expect(loginRejectedState.userInvalidReason.error).toBe(INVALID_REASON);
+            });
+        });
+    });
+});
+
+````
+
+These tests emphasize that the auth module advances user state autonomously upon login.

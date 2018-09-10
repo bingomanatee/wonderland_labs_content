@@ -1,0 +1,12 @@
+{
+    "file_name": "detail",
+    "title": "(Level of ) detail",
+    "intro": "the measurement of the level of tessellation of a network .",
+    "revised": "2013-08-06 12:35",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

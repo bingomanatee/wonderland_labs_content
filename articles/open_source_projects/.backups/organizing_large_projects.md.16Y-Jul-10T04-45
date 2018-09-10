@@ -1,0 +1,111 @@
+There are a few recurring patterns that I've found for managing large scale projects that make them easier to develop and grow. This is focusing on client-heavy UI projects
+
+## 0. Understand the media requirements
+
+The browser is no longer the only media to target and even when it was, there were multiple browsers with a range of limitations all their own.
+
+Now, with mobile and tablets being a major part of the marketplace, responsive concerns are a significant part of the design process and should influence design and process modelling from the start. 
+
+## 1. Create and model clear state changes
+
+Understanding the state of the application and its components is critical to keeping large products under control. This includes modelling the security concerns into the state.
+
+* Which states are enterable without security access (public/anonymous)
+* Which level of security must be achieved to enter in specific states
+* What the pattern of traversal of states is - linear, random access, hierarchical. 
+* How does the creation or modification of data add or change the availability of states
+* What events should be triggered when specific states are engaged
+* Are there more than one dimensions of state or are all states contained within a unified model
+
+I personally use the Javascript State Machine to model states; it has good eventing, can be merged into existing classes, and easily visualizes the traversal rules. 
+
+## 2. Leverage UI libraries to reduce technical debt 
+
+With the wealth of libraries available, there should be no reason to design a custom widget for mundane elements like dropdowns and buttons. I find Semantic UI to be a great time saver; other engines like Twitter Bootstrap, Cordova and Pure are great timesavers for design and layout. 
+
+Understand the strengths and limitations of your chosen libraries before beginning UI design. Its easier to use customized variations of stock UI tools when the designers understand their UI palette and design with use of your resources in mind from the start. 
+
+## 3. Use structured UI middleware to manage modular development
+
+Being able to organize, reuse and test your code is key to scaling development. There are many modular development engines including
+
+* Angular 
+* React
+* Ember
+* Require
+* Meteor
+
+Each of which provides some flavor of modularity; most resemble the CommmonJS model of compartmental code. 
+
+Scaling development by definition includes regression concerns. While developing components, its crucial to understand how, in testing, the components inputs from their behavior. This means
+
+* isolating direct REST polling to external libraries that can be replaced with test input 
+* isolating access to system resources (window, document, DOM) from the testable components like state machines and business logic routers
+* using MVC patterns to ensure that business logic executes in its own scope
+
+## 3. Designing a useful REST store
+
+Developing a backend layer involves:
+
+* ensuring security around important actions, especially actions that change data
+* deciding how request parameters will be passed to the server
+* defining a vocabulary of reusable patterns
+* deciding when the rest pattern is useful and when you want a richer data set
+
+Building and testing data integrity and security from the start is important for any apps, especially those actions that modify data. Session based security is usable in REST just as it is for the rest of the app. 
+
+Reusing the same patterns of how you want to query the app makes an api more consistent. Part of that is fed to you by the pattern of REST verbs. Make sure you understand the implication of POST vs. PUT and use the rest action that best represents the level of interaction that you want an API to perform. However along with the path, ID and verb of the request, metadata around pagination, searching and parameters like date ranges must often be passed. There are several channels of information for metadata including 
+
+* Headers
+* url Query parameters
+* body parameters
+* url path parameters
+
+Using the transport that requires the least amount of fussing with formatting makes your life easier. For instance, parameters for pagination are numeric -- which are easy to encode in the URL. Search string parameters on the other hand require encoding and are easier to pass as body parameters or headers. 
+
+Ideally, your backend coders won't have to look at too many different parts of the request, so be as consistent as possible with your request parameters. 
+
+### Where's the REST of me?
+
+REST theology requires that each collection of data exists on a different endpoint. This can create a multiplicity of expensive HTTP calls to pull a complete resource from the API. 
+
+While creating an atomic REST system that describes your data in nice little chunks is good, sometimes its better to bring in all the relevant data around major elements. My rule of thumb is:
+
+1. Use request parameters to determine if you want the base or full data suite for a resource. 
+2. For the full suite, only bring in one level of sub-resources, and only those resources that aren't expected to be too verbose.
+3. Paginate long lists of sub-resources and document the total size of sub-resources available. 
+4. Filter our rarely used fields of sub resources to reduce their size
+
+While GETting rich data is good, when it comes to updating data, stay atomic; you should only update one resource at a time, though inserting multiple records in series (of a single type) can work well in some contexts. 
+
+When you do multi-updates, decide up front whether the data is unified; if one record fails should the entire transaction roll back?
+
+## 4. Always have one level of indirection between code that executes lower level (direct) accesses and code that returns it.
+
+This is a subtle and difficult thing to pick up on, partly because not doing this doesn't have immediate painful consequence and obeying this pattern doesn't have immediate rewards. 
+
+If you use direct access to lower level resources in your code you will find repeated boilerplate patterns all over the place. Worse yet, when a flaw in your access patterns is discovered, or you need to isolate a pattern for testing or stub/mock it out, you will find it difficult to do so because so much of your implementation patterns are buried in scattered code. 
+
+One classic example of this in Javascript is getting the current time. Classically(and very clumsily) this is done from a new Date instance: 
+
+```` javascript
+
+var time = new Date().getTime();
+
+````
+
+If you have this all over your project you will get the correct time, roughly. However at some point you will discover this Date object is bound to the browser's settings; and of course it always tries to return the correct time meaning, from a test point of view, it becomes impossible to test for conditions that occur in specific times/days. 
+
+Wrapping this code in a function `myTime()` allows you to set a different basis for time; such as a web service through which you broadcast the absolute valid time from your server (or a third party equivalent). Similarly you can stub out or drive via configuration an artificial time for the purpose of testing/mocking. 
+
+### At the meta level: getting your resources 
+
+While this works at the tactical level, sometimes putting a level of indirection around your module/resource loading code is a necessary injection to allow for stubbing resources during the test process. 
+
+For instance, say you rely on a third party library for getting twitter user data by scraping http pages, like [this one](https://github.com/slang800/twitter-screen-scrape). It works okay in tests, so you apply it but you find it becomes a stumbling point in test writing, and its a bit slow, so you wish to put a cache in front of it. 
+
+If you'd used that module directly in several places, you'll have to re-code all those several places to the new specification. if, on the other hand, you wrap it in a method that you can configure, you can control the result, piping through a cache layer etc. However if you do this often enough you'll find that the abstraction itself is repeated boilerplate. This is where Dependency Injection is. 
+
+Dependency Injection (DI) is about placing a service between the definition of methods and classes and the accessing of those methods and classes. The built in methods in Javascript or Ruby are the CommonJS/ES6 module system and the gem system respectively. But since those systems directly access the file system (or a compressed/virtual version of it) and are contained within the code of the language implementation itself, they won't really allow you to substitute mocked/stubbed versions of themselves. 
+
+Angular's DI model is a famous solution to this problem, but not the only one. I'm using [Bottle.js] (https://github.com/young-steveo/bottlejs) to accomplish the same thing. Whether through provision of mocked data or decorators that alter or replace functionality on demand, the DI pattern gives you the ability to switch out resource systemically for when you need to control application flow to promote testability. This is most important to control resources whose output is otherwise driven by external data flows, such as APIs, social or third party data.

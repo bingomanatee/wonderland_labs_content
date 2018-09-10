@@ -1,0 +1,80 @@
+Your state stack reflects your current energy, readiness and attitude, and accrued damage. It is a stack or series of cards in this order:
+
+* stun (face down at 90 degrees) cards or blue poker chips
+* damage (face up, at 90 degrees) cards or red poker chips
+* defense (face down) cards or white poker chips
+* initiative (face up) cards or a red poker chip
+* action (face down) cards or white poker chips
+
+**Note**  there are circumstances when you will not have an initiative card, in which case all the topmost cards are considered defense cards.
+
+Everyone starts with four face down cards. 
+
+## Setting initiative
+
+In the beginning of each round, if you do not have a flipped up initiative card, you flip over one or more of your face down cards and keep the highest card that is not greater than your Speed. 
+
+* If none of your cards are that high you must put your initiative card at the front of your stack - meaning you don't have any action cards and cannot act that round. 
+* If your initiative card is not greater than your speed you can put it in between your blank cards, dividing your stack into action and defense cards.
+
+## Order of action
+
+Action is resolved in phases, counting down from four to one. 
+
+* **On the fourth phase**, everyone with four or more action cards acts, in descending order of number boost cards, then in descending order of the value of their initiative card. 
+* **On phase three to one**, players with those many action cards act in descending order of initiative cards. 
+* **On phase zero**, Players with no action cards but who do have an initiative card can rebalance their deck and burn off cards above two. 
+ 
+## Actions
+
+On your turn you can do one of the following: 
+
+### Act
+
+You can take any active action you want. Choose a skill to use and determine your rank at that skill. 
+
+#### Contests 
+
+If your action is offensive against another character you perform a **contest of skill**, followed by a **contest of power**. 
+
+Both the defender and the attacker can pre-commit one or more of their boost cards in both phases of the contest. They then each draw a card from the deck and choose the single card that is lower than or equal to their rank; Aces are 1, Face cards (J, Q, K) are 11, 12, 13, or 1, 2, 3, drawers' choice. 
+
+If the attacker wins, or ties the defender and has more attack cards in play, they succeed. 
+
+#### Damage
+
+Your damage threshold depends on the difference between the attacker and defenders' cards in the contest of power (Margin of Damage) and the the defenders'  
+
+##### Loss of Initiative
+
+If you have a heavy weapon (axe, mace, etc.) the attacker discards their initiative card at the end of your round. 
+
+If the defender uses all their defense cards they must discard their initiative card. 
+
+#### Hard Boost 
+
+You can also pre-emptively flip an action card and take the best of that card and the card you draw. However you must discard your initiative card after your action if you do this (so it cannot be done with heavy weapons). 
+
+If both flipped cards are above your rank you can still redraw boost cards until you get a usable value or run out.
+
+#### Resolving Attack Effect
+
+Take a card for every margin of victory between the attacker and the defender. 
+
+### Boost your deck
+
+If you don't have any stun, you can attempt to replenish your stack by adding cards to your stack. You can add the new cards anywhere you want in your stack (defense, action, or some distribution of both). 
+
+Draw a card to determine how many cards you get:
+
+* if the value is up to or below the sum of your damage and current stack (including defense, offense and initiative card) add one card
+* if the value is above the sum of your cards, add two cards. 
+* if the value is above twice the sum of your cards, add three cards. 
+
+After every action in which you have more than four cards (including damage but not including stun) remove one card. 
+
+### Recovering Stun
+
+On your action you can take time to remove one or more cards from your stun. 
+
+Draw a card; if the total is under your willpower, remove two Stun cards; if it is above it, remove one.

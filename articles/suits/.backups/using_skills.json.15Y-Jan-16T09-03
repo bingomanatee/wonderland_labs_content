@@ -1,0 +1,17 @@
+{
+    "file_name": "using_skills",
+    "title": "Using Skills",
+    "intro": "Using Skills in Suits",
+    "revised": "2015-01-16 09:03",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "suits",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

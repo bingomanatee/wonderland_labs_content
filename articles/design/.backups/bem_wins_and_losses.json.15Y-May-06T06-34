@@ -1,0 +1,17 @@
+{
+    "file_name": "bem_wins_and_losses",
+    "title": "BEM wins and Losses in practice",
+    "intro": "BEM promises a reduction in css confusion -- if you are willing to pay the price.",
+    "revised": "2015-05-06 06:34",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "design",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

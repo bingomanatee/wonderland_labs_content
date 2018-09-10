@@ -1,0 +1,222 @@
+Processing geographic data in bulk using Icosahedron is a multi-tier process. 
+
+In this simple sample case we are exporting color data for each sector. The sector points are all colored the same, based on a time sensitive index; however their borders will be a unique color based on the blending of color data between two sectors. 
+
+<iframe width="500" height="375" src="//www.youtube.com/embed/TdVzmBogTUs?version=3&autoplay=1&loop=1&playlist=TdVzmBogTUs" frameborder="0" allowfullscreen></iframe>
+
+## The main script
+
+note - this is taken from the tap tests; some TAP stuff not essential to execution. 
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var tap = require('tap');
+var cluster = require('cluster');
+var icod = require('./../index.js');
+var ico = require('icosahedron');
+
+var connection = "mongodb://localhost/test_ico_data_" + Math.floor(Math.random() * 100000);
+var SCRIPTS_ROOT = path.resolve(__dirname, '../test_scripts');
+
+var DETAIL = 4;
+var sector_colors = path.resolve(SCRIPTS_ROOT, 'sector_colors.js');
+var async = require('async');
+var mongoose = require('mongoose');
+
+var Colors = require(path.resolve(SCRIPTS_ROOT, 'colors_model.js'))();
+/**
+ * testing execution of scripts with no errors.
+ */
+
+if (cluster.isMaster) {
+
+    icod.init_manager(function (err, manager) {
+            manager.connect(connection, function () {
+                tap.test('ico-data', {timeout: 1000 * 1000, skip: false }, function (suite) {
+                    suite.test('rationalize and map reduce', {timeout: 1000 * 1000, skip: false }, function (lp_test) {
+
+                        manager.load_points(DETAIL, function () {
+                            function done() {
+                                manager.shut_down(function () {
+                                    cluster.disconnect(function () {
+                                        console.log('done with colorize_points for %s', connection);
+                                        lp_test.end();
+                                    })
+                                });
+                            }
+
+                            function do_sector_colors(time) {
+
+                                function summarize_colors_to_sectors() {
+                                    manager.map_reduce_sector_data(0, {
+                                        field: 'color', detail: DETAIL, time: time, output_collection: 'colors', 'sector': 'all'
+                                    }, function () {
+                                        Colors.draw_sector_colors(time, DETAIL, function () {
+                                            if (time < MAX_TIME) {
+                                                do_sector_colors(time + 1);
+                                            } else {
+                                                done();
+                                            }
+                                        });
+
+                                    });
+                                }
+
+                                manager.set_time(time, function () {
+                                    manager.do(sector_colors, function (err, results) {
+                                        manager.rationalize_multiple_values('all', {
+                                            field: 'color',
+                                            detail: DETAIL,
+                                            'comp_value': path.resolve(SCRIPTS_ROOT, 'average_color_value.js'),
+                                            time: time
+                                        }, summarize_colors_to_sectors);
+                                    }, {detail: DETAIL});
+
+                                })
+
+                            }
+
+                            var MAX_TIME = 30;
+                            do_sector_colors(0);
+
+                        });
+
+                    });
+
+                    suite.end();
+
+                });
+
+            })
+
+        }
+    )
+
+} else {
+    icod.init_child();
+}
+```
+
+The basic flow here is 
+
+1. init the manager (or, downstream, the client). 
+2. connect to a Mongo database
+3. load points for the given level of detail (4). 
+4. execute over a range of time from 0 to MAX_TIME(30). 
+5. shut down the manager.
+
+Step four, in detail: 
+
+1. set the clients' current time
+2. set the sector color for the current time and level of detail to a field 'color'; a local script does this and saves the data to Mongo.
+3. rationalize the border points of each sector
+4. map-reduce sector data into single records
+5. draw a colored map of the point/data based on the map-reduced data
+
+Step 5 uses ?[icosahedron-draw](icosahedron_draw) to blend data saved by ?[icosahedron-data](icosahedron_data) and point data from ?[icoashedron](icosahedron) into png files.
+
+## Resource Scripts
+
+There are three resource scripts at work here:
+
+1. a script to generate a color based on a point data and time. 
+2. a script to blend color data. Because it is an array of channel colors, not a numeric value, it requires an injection of a blend script to average its values. 
+3. a custom color model to read the data from map-reduced summaries of each sector into a global map. 
+
+### Generating colors based on sector and time
+
+The colors for each point in the sector are taken from an array of colors that are rotoscoped based on time: 
+
+``` javascript
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var async = require('async');
+var Color = require('color');
+
+/* ------------ CLOSURE --------------- */
+
+/** ********************
+ * Purpose: return the latitude for each point
+ * @return void
+ *
+ * @param data {object}
+ * @param client {Client}
+ * @param callback {function}
+ */
+var colors = _.range(0, 20).map(function(sector){
+    var c = Color().hsl(sector * 360/20, 100, 50);
+    return c.rgbArray();
+})
+
+function sector_colors(data, client, callback) {
+    var detail = data.data.detail;
+
+    var latitudes = [];
+    client.point_script(function (point, done) 
+        var index = (client.sector + client.time) % 20;
+        var color = colors[index];
+      //  console.log('setting color of %s to %s', point.ro, color);
+        client.queue_point_data('color', detail, point.ro, color);
+        done();
+    }, detail, function (err, result) {
+        //   console.log('result of point_script: %s, %s', util.inspect(err), util.inspect(result));
+        client.save_point_data_queue('color', detail, callback);
+    })
+}
+
+/* -------------- EXPORT --------------- */
+
+module.exports = sector_colors;
+
+```
+
+the key activity here is that `client.point_script` iterates over each point, queueing a color into the client, and `client.save_point_queue` dumps this queue set of data into Mongo.
+
+### Averaging color values
+
+Due to the array nature of the points, rationalizing edge points can't be done with a simple numeric average. To accomplish this, a custom script is injected to `rationalize_multiple_values`: 
+
+``` javascript
+var _ = require('underscore');
+var util = require('util');
+
+/* ------------ CLOSURE --------------- */
+
+/** ********************
+ * Purpose: average color values for border point
+ * @return [int, int, int]
+ */
+
+function acv(point_data) {
+    var value = _.pluck(point_data, 'value').reduce(function (out, value) {
+        out[0] += value[0];
+        out[1] += value[1];
+        out[2] += value[2];
+
+        return out;
+
+    }, [0, 0, 0]);
+    value[0] /= point_data.length;
+    value[1] /= point_data.length;
+    value[2] /= point_data.length;
+    var avg =  value.map(function(v){
+        return Math.round(v);
+    });
+
+
+ //   console.log('reduced %s to %s ', util.inspect(_.pluck(point_data, 'value')), avg);
+    return avg;
+}
+/* -------------- EXPORT --------------- */
+
+module.exports = acv;
+
+```
+
+The end result is a series of sector images. Note that the color rotoscopes over time.

@@ -1,0 +1,200 @@
+This project was originally about getting movie data times and mashing it up with IMDB. We need another source out there for that data. 
+
+The good news is [tmsapi.com](http://developer.tmsapi.com/io-docs) has this data. The bad news is it rate limits the data to 50 calls a day.
+
+For this experiment we will respond by 
+
+1. limiting the search zones to six metropolitan areas: (Bay Area, New York City, Los Angeles, Portland, Oregon, Seattle, Washington and Austin, TX). 
+2. Getting 30 days of data and refreshing caches every 7 days
+
+As before, we get an API key from the provider and store it in `passport_config.json`:
+
+``` json
+{
+    "eventful_auth_key": "xxx",
+    "tmsapi_auth_key": "yyy"
+}
+```
+
+Since the API is specialized for movies, we don't need to worry about categories. Also the data is better normalized than the eventful data, so less work will be had there. 
+
+## Testing the Cache
+
+Since we have a very limited opportunity to hit the API -- 50 requests per day -- we need to be confident that the cache works; i.e., that once we save the cache, we won't be re-polling the tmsapi.com site unless the cache is stale (once every week per zip). 
+
+This basic test (a tap test) give confidence that the caching system will minimize our access to the tmsapi.com's apis. 
+
+The process is, in summary: 
+
+0. stub out apiary with fake keys to ensure that we never actually poll tmsapi.com in our tests.
+1. redirect the cache folder to a test folder 
+2. prepare that test folder with our own data: one zip code that is stale, and one that is not. 
+3. stub out the polling function to return data we prepare
+4. validate our two use cases:
+   * when we have a cache file and it is not stale, we will **not** poll the (stubbed) api. 
+   * when we have a cache_file and it **is** stale, we will poll the (stubbed) api.
+
+We validate this by ensuring that the poll stub for the stale file returns the data we expect, but the poll stub for the other zip returns junk data. That way, if we re-poll the fresh cache file, we won't get data we expect. 
+
+here are the tests:
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var tap = require('tap');
+var moment = require('moment');
+
+var TMSAPI_CACHE_DIR = path.resolve(__dirname, 'test_files/tmsapi_cache');
+
+var DATA_12345 = {data:[
+    {
+        tmsID: 'EV0001',
+        title: 'movie 12345',
+        showtimes: [
+            {
+                theatre: {
+                    id: 2,
+                    name: 'Beta Theatre'
+                },
+                dateTime: "2013-10-19T12:00"
+            }
+        ]
+    }
+]};
+
+var DATA_54321 = {data:[
+    {
+        tmsID: 'EV00012',
+        title: 'movie 54321',
+        showtimes: [
+            {
+                theatre: {
+                    id: 1,
+                    name: 'Alpha Theatre'
+                },
+                dateTime: "2013-10-19T12:00"
+            }
+        ]
+    }
+]};
+
+var ZIPS = [
+    {zip: 12345, age: 0, data: DATA_12345},
+    {zip: 54321, age: 10, data: {}}
+];
+
+tap.test('models', {timeout: 1000 * 10, skip: false }, function (suite) {
+
+    suite.test('tmsapi_model', {timeout: 1000 * 10, skip: false }, function (tmsapi_test) {
+        var apiary_mock = {
+            get_config: function (value) {
+                switch (value) {
+                    case 'tmsapi_auth_key':
+                        return'tmsapi-key';
+                        break;
+
+                    default:
+                        throw new Error('not equipped to get value ' + value);
+                }
+            }
+        };
+
+        function _init_mock_cache(done) {
+
+            fs.readdir(TMSAPI_CACHE_DIR, function (err, files) {
+
+                files.forEach(function (file) {
+                    fs.unlinkSync(path.resolve(TMSAPI_CACHE_DIR, file));
+                });
+
+                ZIPS.forEach(function (zip) {
+
+                    fs.writeFileSync(path.resolve(TMSAPI_CACHE_DIR, zip.zip + ''),
+                        JSON.stringify(
+                            _.extend({
+                                startDate: new moment().subtract(zip.age, 'days').format('YYYY-MM-DD')
+                            }, zip.data)
+
+                        )
+                    )
+                });
+
+
+                done();
+            });
+
+        }
+
+        function _tests() {
+
+            require('./../resources/models/tmsapi_model')(apiary_mock, function (err, tmsapi_model) {
+
+                tmsapi_model.CACHE_DIR = TMSAPI_CACHE_DIR;
+
+                // overriding poll_api
+
+                tmsapi_model.poll_api = function (zip, cb) {
+                    switch (zip) {
+                        case 12345:
+                            cb(null, {});
+                            break;
+
+                        case 54321:
+                            cb(null, DATA_54321);
+                            break;
+
+                        default:
+                            cb(new Error('have no data for zip ' + zip));
+                    }
+                };
+
+                var six_days_ago = new moment().subtract(6, 'days').startOf('day');
+
+                var then = tmsapi_model.then(six_days_ago.format('YYYY-MM-DD')).startOf('day');
+                tmsapi_test.equal(then.unix(), six_days_ago.unix(), 'test then conversion');
+                tmsapi_test.equals(tmsapi_model.age(then), 6, 'then is six days ago');
+
+                tmsapi_test.test('reading cache file 12345', function (test) {
+
+                    // data in file 12345 is current so doesn't require calling poll_api again.
+                    tmsapi_model.get_movies(12345, function (err, movies) {
+                        delete movies.startDate;
+                        test.deepEqual(movies, DATA_12345, '12345 movies');
+                        test.end();
+                    });
+
+                });
+
+                tmsapi_test.test('polling 54321', function(test){
+                    // data in file 54321 is out of date so requires a poll.
+
+                    tmsapi_model.get_movies(54321, function(err, movies){
+                        delete movies.startTime;
+                        test.deepEqual(movies, DATA_54321, '54321 movies');
+                        test.end();
+                    })
+
+                });
+
+                tmsapi_test.end();
+            });
+        }
+
+        _init_mock_cache(_tests);
+
+    });
+
+
+    suite.test('eventful_model', {timeout: 1000 * 10, skip: false }, function (eventful_test) {
+
+        eventful_test.end();
+    });
+
+    suite.end();
+
+});
+
+```

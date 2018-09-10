@@ -1,0 +1,50 @@
+ES6 is large. But in using it I've found a distinct subset of things that are really useful and need to know. Here they are in cheat sheet form.
+
+## Arrow (Lambda) functions
+
+Arrow functions are a very compact functional notation, kind of the '(bool)?ifThen:ifFalse' version of a function. 
+
+```` javascript
+
+function double(value) {
+   return 2 * value;
+}
+
+// is equal to 
+
+const double = (value) => {
+return (value) => 2 * value;
+}
+
+/// and equal to 
+
+const doubleShort = value => 2 * value;
+```` 
+
+* for single line functions, the braces(`{}`) are optional. Also the return is optional (implied) as in ruby.
+* If you only have one argument the parentheses(`(argument)`) are optional, though I tend to include them ayway for clarity
+* Lambda functions are not closures; this inside lambda === this outside lambda. 
+
+````
+
+function Worker(firstName, lastName) {
+this.firstName = firstName;
+this.lastName = lastName;
+this.capitalize = () => {
+this.firstName = `${this.firstName.substr(0,1).toUpperCase()}${this.firstName.substr(1)}`;
+this.lastName = `${this.lastName.substr(0,1).toUpperCase()}${this.lastName.substr(1)}`;
+}
+
+this.name = () => `${this.firstName} ${this.lastName}`;
+}
+
+let worker = new Worker('bob', 'jones');
+console.log('worker: ', worker.name());
+worker.capitalize();
+console.log('worker: ', worker.name());
+/**
+output:
+worker:  bob jones
+worker:  Bob Jones
+*/
+````

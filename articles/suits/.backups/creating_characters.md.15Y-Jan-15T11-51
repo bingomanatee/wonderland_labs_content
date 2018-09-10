@@ -1,0 +1,43 @@
+Suits characters can be initialized using one of two methods:
+
+## Purchasing Abilities
+
+Abilities can be purchased using People Points (PP). 
+
+### Attributes
+
+The cost for Attributes (in PP) are as follows: 
+
+<table border=1 cellpadding=4><tr><th>Attribute
+<th>1<th>2<th>3<th>4<th>5<th>6*
+<tr><td>PP Cost
+<td>-10<td>-4<td>0<td>6<td>14<td>25</table>
+
+Note that unlike skills attributes are difficult to improve over time; if for instance you were born with a Body of rank 4 and wanted to improve it to rank 5, it would cost 16 PP, not the 8 that is the gap between 4 and 5 on this table. Choose wisely! 
+
+&ast; Only one of your attributes may be set to level 6.
+
+### Skills
+
+Skills are bought initially at the same rank as a base attribute (or half that for hard skills). Add one to your rank for that skill if you have studied a college that contains the skill. (this does *not* compound -- there is no bonus for learning a skill that is in more than one college you have studied.)
+
+Your maximum skill rank at any given skill is twice the base attribute; so if your base attribute is three for a given skill, your maximum rank in the attribute is six. 
+
+<table border=1 cellpadding=4>
+<tr><th>Base
+<th>+1
+<th>+2
+<th>+3
+<th>+4
+<th>+5
+<tr><td>PP cost
+<td>1
+<td>2
+<td>4
+<td>8
+<td>12
+</table>
+
+### Colleges
+
+Colleges cost 3 points (except as noted). This gives you all skills in the college at base level (or half base attributes, for hard skills). Any further improvement must be bought on a skill by skill basis; You cannot purchase a college multiple times.

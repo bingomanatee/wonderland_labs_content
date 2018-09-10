@@ -1,0 +1,54 @@
+<style>
+        table.weaponTable {
+            border: 1px solid black;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+width: 100%;
+        }
+
+        .weaponTable td, .weaponTable th {
+            padding: 0.5em;
+            margin: 0;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .weaponTable th {
+            background-color: rgb(225, 225, 230);
+            font-weight: normal;
+            vertical-align: bottom;
+        }
+
+        .weaponTable .name {
+            width: 14em;
+        }
+
+        .weaponTable .number {
+            width: 1.5em;
+            text-align: right;
+        }
+
+        .weaponTable .notes {
+            width: 8em;
+            text-align: left;
+        }
+
+    </style>
+
+Armor statistics
+
+<table class="weaponTable" cellpadding="0" border="0" cellspacing="0" style="width: 50%">
+<thead>
+<tr><th class="name">Name<th>Damage Absorption<th>Defense<th>Kg<th>Notes</tr>
+</thead>
+<tbody>
+<tr><td class="name">Light Leather<td>1<td><td>2<td></tr>
+<tr><td class="name">Heavy Leather<td>2<td><td>5<td></tr>
+<tr><td class="name">Studded Leather<td>3<td><td>7<td></tr>
+<tr><td class="name">Fur<td>3<td>1<td>12<td></tr>
+<tr><td class="name">Light Mail<td>4<td>1<td>10<td></tr>
+<tr><td class="name">Heavy Mail<td>5<td>2<td>12<td></tr>
+<tr><td class="name">Light Plate<td>6<td>2<td>18<td></tr>
+<tr><td class="name">Medium Plate<td>7<td>3<td>21<td></tr>
+<tr><td class="name">Heavy Plate<td>8<td>3<td>26<td></tr>
+</tbody>
+        </table>

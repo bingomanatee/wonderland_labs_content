@@ -1,0 +1,17 @@
+{
+    "file_name": "import_export",
+    "title": "Importing and Exporting data",
+    "intro": "Once you have data into a geosphere at a given resolution you can get it in and out quickly",
+    "revised": "2013-08-05 11:43",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

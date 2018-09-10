@@ -1,0 +1,5 @@
+One of the absences I've been feeling around the react framework is the loss of the DI utility in Angular. For those who haven't got deep enough in Angular to do serious testing (And yes you _should_ feel bad!) the module framework probably feels like a huge timehole. However when you do get into areas of testing where mocking and stubbing become paramount, the DI framework is a crucial part of the equation. 
+
+Given that DI is broadly documented I'll do a "TLDR" here and say the idea behind it is that if you use a resource framework to get the components (classes, constants, classes) of your application from, you can then replace some or most of them with stand-ins that you "turk" for the purposes of testing. 
+
+I'm doing something here I don't usually do which is advocate a technology before I have a large enough bases for analysis but my initial experiments in using DI + react have been extremely rewarding and I wanted to pass this on early for those looking for a solution in this area.

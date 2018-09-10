@@ -1,0 +1,309 @@
+I am working on a Reat personal project and it became clear to me that I wanted it to have internationalization that is (once the system was designed) intuitive and relatively pain-free. This meant, for instance:
+
+1. For the base language, I did not want it to incur extra requests for language data; I wanted the base language to be bundled with source and retrievable without a request/response cycle. 
+2. As the system evolved I realized I wanted larger blocks of text to be converted to markdown; this meant being able to pick out the text nodes for translation. 
+3. I wanted to automate the translation using an API for language as I am sadly monolingual. 
+4. I wanted the text data to be embedded with the consuming components and checked into git, just like the class files and the css. 
+5. I wanted the locale to be a model that when changed, triggered universal reloading of all the sites' content.
+
+## Large Blocks and Small Labels
+
+The difference between small pieces of text and large tracts of styled blocks meant that this system would have two sytstems of storage: 
+
+* json blocks of name-value maps that did not include any style; where style is needed it would be part of the containing template. An entire components' language dictionary would likely be fairly terse, so digesting all of a components' terms at once seemed reasonable. (at least for one language -- given that there could be hundreds of languages, in all cases the dictionaries would be loaded one locale at a time.)
+* markdown files; these would be zero to many files of large blocks of text; these would be loaded on-demand and always through HTTP as preloading large blocks of markdown and embedding them in a webpacked project seemed like it would make bloaty files. 
+
+## The brokers
+
+The terms and markdowns would be cached in nested Maps. This allows certain terms/languages to be pre-loaded to reduce the need for accessing the language API. 
+
+The terms and markdown would be stored in nested Maps (the ES6 dictionary class). The top of the tree would be components; the component map would contain maps indexed by language. These maps in turn include file-block maps (for markdown) or term-text maps (for strings). 
+
+There is an equivalent and very similar code set for markdown. 
+
+``` javascript
+
+/**
+ * a nested three-depth map storing strings by comp(onent), then locale, then key(name).
+ * @type {Map}
+ */
+let compMap = new Map();
+
+const reset = () => {
+    compMap = new Map();
+}
+
+const getComponent = (comp) => {
+    if (compMap.has(comp)) {
+        return compMap.get(comp);
+    }
+    let langSet = new Map();
+    compMap.set(comp, langSet);
+    return langSet;
+};
+
+const copyValues = (valueMap, values) => {
+    for (let key in values) {
+        if (values.hasOwnProperty(key)) {
+            valueMap.set(key, values[key]);
+        }
+    }
+};
+
+const setStrings = (comp, lang, values) => {
+    console.log('setting strings: ', comp, lang, values);
+    if (canUseDOM && !lang) {
+        eval('debugger;"no lang"');
+    }
+    let clMap = getComponent(comp);
+    let langMap = clMap.has(lang) ? clMap.get(lang) : new Map();
+    copyValues(langMap, values);
+    clMap.set(lang, langMap);
+};
+
+const mapToObj = map => {
+    let out = {};
+    map.forEach((value, key) => {
+        out[key] = value;
+    });
+    return out;
+};
+
+const getStrings = (comp, locale) => new Promise((resolve, reject) => {
+    try {
+        if (compMap.has(comp) && compMap.get(comp).has(locale)) {
+            let values = compMap.get(comp).get(locale);
+
+            return resolve(mapToObj(values));
+        }
+    } catch (err) {
+        console.log('error: ', err);
+    }
+
+    console.log('getting strings from API:', comp, locale);
+
+    http.get('/api/strings/' + locale).then((data) => {
+        var compValues = null;
+        for (let dataComp in data) {
+            if (!data.hasOwnProperty(dataComp)) {
+                continue;
+            }
+            let values = data[dataComp];
+            setStrings(dataComp, locale, values);
+            if (dataComp === comp) {
+                compValues = values;
+            }
+        }
+        if (compValues) {
+            console.log('compValues: ', compValues);
+            resolve(compValues);
+        } else {
+            reject(new Error('none found'));
+        }
+    }, reject);
+});
+
+export {getStrings, setStrings, reset};
+
+```
+
+## The locale model
+
+Here I dip my toe into RX; a simple observer/broadcaster alerts subscribers when the locale changes.
+
+this module also includes a set of possible languages; this is important not just for ui/form selection but also for the translation script. 
+
+``` javascript
+
+import Rx from 'rx';
+import http from '../core/HttpClient';
+
+const EN = 'en-US';
+const FR = 'fr-FR';
+
+let currentLocale = EN;
+let watcher;
+let localeModel;
+let localeList = [
+    EN, FR
+];
+
+currentLocale = EN;
+localeModel = new Rx.ReplaySubject();
+watcher = localeModel.subscribe(locale => currentLocale = locale);
+localeModel.onNext(EN);
+
+const reset = () => {
+    localeModel.dispose();
+    localeModel = new Rx.ReplaySubject();
+    localeModel.onNext(EN);
+    watcher = localeModel.subscribe(locale => currentLocale = locale);
+};
+
+const localeToLang = locale => locale.split('-').shift();
+
+export {currentLocale, localeModel, localeList, localeToLang, reset, EN};
+
+```
+
+## Not shown: translation and apis
+
+There are scripts for loading all the base language(en-US) files and running them against google translate APIs; these are pretty predictable and tangential to this example. 
+
+## The Decorators
+
+The first pass had a lot of boilerplate; to reduce the overhead, this was removed to a decorator that subscribed all components to changes in the locale and reloaded strings and markdown files. 
+
+``` javascript
+
+import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
+import { getStrings, setStrings, EN } from '../model/stringBroker';
+import { currentLocale, localeModel} from '../model/localeModel';
+import { getMarkdownFile, setMarkdownFile } from '../model/markdownBroker';
+import _ from 'lodash';
+import marked from 'marked';
+/**
+ *
+ * @param compName {String} the name of the component
+ * @param markdownFiles {String} | [{String}] either the name of a single file, or an array of strings, that are markdown file names. (optional)
+ * @returns {Function}
+ */
+function withStrings(compName, pMarkdownFiles) {
+
+    return (BaseComp) => {
+        let baseComponentWillMount = BaseComp.prototype.componentWillMount || (() => {
+          });
+
+        BaseComp.prototype.componentWillMount = function () {
+            baseComponentWillMount.call(this);
+            if (!this.state) {
+                this.state = {};
+            }
+            this.state.locale = currentLocale;
+            if (markdownFiles) {
+                for (let file of markdownFiles) {
+                    this.state[file] = '';
+                }
+            }
+        };
+
+        if (!canUseDOM) {
+            BaseComp.prototype.markdownNode = () => '';
+            return BaseComp;
+        }
+
+        let baseComponentDidMount = BaseComp.prototype.componentDidMount || (() => {
+          });
+        let baseComponentWillUnmount = BaseComp.prototype.componentWillUnmount || (() => {
+          });
+
+        let markdownFiles = pMarkdownFiles;
+        if (markdownFiles && (typeof markdownFiles === 'string')) {
+            markdownFiles = [markdownFiles];
+            markdownFiles = _(markdownFiles).uniq().compact().value();
+        }
+
+        BaseComp.prototype.componentDidMount = function () {
+            baseComponentDidMount.call(this);
+            this._localeSub = localeModel.subscribe((locale) => {
+                getStrings(compName, locale)
+                  .then(strings => this.setState(Object.assign({locale: locale}, strings))
+                    , console.log.bind(console));
+
+                if (markdownFiles) {
+                    for (let file of markdownFiles) {
+                        getMarkdownFile(compName, locale, file)
+                          .then(text => {
+                              let def = {};
+                              def[file] = text;
+                              this.setState(def);
+                          });
+                    }
+                }
+            });
+        };
+
+        BaseComp.prototype.componentWillUnmount = function () {
+            baseComponentWillUnmount.call(this);
+            if (this._localeSub) {
+                this._localeSub.dispose();
+            }
+        };
+
+        BaseComp.prototype.markdownNode = function (file) {
+            if (!this.state[file]) {
+                return '';
+            }
+            let textHTML = '';
+
+            try {
+                textHTML = marked(this.state[file]);
+            } catch (err) {
+                console.log('error in markdown', err);
+                textHTML = '...';
+            }
+            return <div dangerouslySetInnerHTML={{__html: textHTML}}/>;
+        };
+
+        return BaseComp;
+    };
+}
+
+export default withStrings;
+
+```
+
+This decorator could then be applied to any class needing translation. Here for instance is the navigation component for the site:
+
+``` javascript
+
+import React, { PropTypes, Component } from 'react';
+import classNames from 'classnames';
+import styles from './Navigation.css';
+import withStyles from '../../decorators/withStyles';
+import Link from '../Link';
+import withStrings from '../../decorators/withStrings';
+import LocaleMenu from './../LocaleMenu';
+import {currentLocale, localeModel, EN } from '../../model/localeModel';
+import { getStrings, setStrings } from '../../model/stringBroker';
+
+const COMP_NAME = 'Navigation';
+import enStrings from './strings/en-US.json';
+setStrings(COMP_NAME, EN, enStrings);
+// this pre-seeds the english version of the base strings,
+// reducing the need of http requests for the base language
+
+@withStyles(styles)
+@withStrings(COMP_NAME)
+class Navigation extends Component {
+    render() {
+        return (
+          <lt;nav className="Navigation" role="navigation">gt;
+              <lt;a className="Navigation__link Navigation__link--about" href="/about"
+                 onClick={Link.handleClick}>gt;
+                  <lt;span>gt;{this.state.about}<lt;/span>gt;
+              <lt;/a>gt;
+              <lt;a className="Navigation__link Navigation__link--contact" href="/contact"
+                 onClick={Link.handleClick}>gt;
+                  <lt;span>gt;{this.state.contact}<lt;/span>gt;
+              <lt;/a>gt;
+              <lt;div className="Navigation__text">gt;
+                  <lt;span className="Navigation-spacer">gt; | <lt;/span>gt;
+              <lt;/div>gt;
+              <lt;a className="Navigation__link Navigation__link--login" href="/login"
+                 onClick={Link.handleClick}>gt;{this.state.login}<lt;/a>gt;
+              <lt;div className="Navigation__text">gt;
+                  <lt;span className="Navigation-spacer">gt;or<lt;/span>gt;
+              <lt;/div>gt;
+              <lt;a className="Navigation__link Navigation__link--signup Navigation__link--highlight" href="/register"
+                 onClick={Link.handleClick}>gt;{this.state.signup}<lt;/a>gt;
+              <lt;a className="Navigation__link Navigation__link--locale">gt;<lt;LocaleMenu />gt;<lt;/a>gt;
+          <lt;/nav>gt;
+        );
+    }
+
+}
+
+export default Navigation;
+
+```

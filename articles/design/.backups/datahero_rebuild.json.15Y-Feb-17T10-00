@@ -1,0 +1,12 @@
+{
+    "file_name": "datahero_rebuild",
+    "title": "Datahero Blog Rebuild",
+    "intro": "Rebuilding a basic blog for readability and enhanced interest",
+    "revised": "2015-02-17 10:00",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "design",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

@@ -1,0 +1,10 @@
+Ruby has set a good standard for web applications and ease of use development. That being said, there are several ways in which Hive MVC is not Ruby.
+
+* Hive MVC is focused on addressing the needs of a heavily client side application by bundling client side resources in the same structure as the script endpoints. Hive MVC
+* Does not make assumptions on the kind of model you use or insist on a particular API for data interaction
+* Does not require you to boot up your entire app to initiate testing. 
+* Does not have a lot of code around the controller for buffering pre/post processing, though this kind of thing can be handled with ?[view helpers](view_helpers).
+* Addresses the coding issues which are uniquely Node in nature, such as ?[action_scripts](breaking down complex callbacks). 
+* Is optimized for REST delivery, with forks in the action scripts for each Method an action can handle. 
+* Is designed for distribution of self-contained user facing solutions, rather than developer-centric tools (which the native Node modules handle quite well).  
+* Ruby uses the classic "sort by files" organization scheme, where as Node uses an extremely ?[action centric file structure](actions).

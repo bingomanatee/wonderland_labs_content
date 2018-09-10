@@ -1,0 +1,143 @@
+Processing geographic data in bulk using Icosahedron is a multi-tier process. 
+
+In this simple sample case we are exporting color data for each sector. The sector points are all colored the same, based on a time sensitive index; however their borders will be a unique color based on the blending of color data between two sectors. 
+
+## The main script
+
+note - this is taken from the tap tests; some TAP stuff not essential to execution. 
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var tap = require('tap');
+var cluster = require('cluster');
+var icod = require('./../index.js');
+var ico = require('icosahedron');
+var ico_draw = require('icosahedron-draw');
+
+var connection = "mongodb://localhost/test_ico_data_" + Math.floor(Math.random() * 100000);
+var SCRIPTS_ROOT = path.resolve(__dirname, '../test_scripts');
+
+var DETAIL = 4;
+var sector_colors = path.resolve(SCRIPTS_ROOT, 'sector_colors.js');
+var async = require('async');
+var mongoose = require('mongoose');
+
+/**
+ * testing execution of scripts with no errors.
+ */
+
+if (cluster.isMaster) {
+
+    icod.init_manager(function (err, manager) {
+            manager.connect(connection, function () {
+
+                function _draw_sectors(time, done_drawing) {
+
+                    var time_file = path.resolve(__dirname, '../test_output', 'sectors_' + time + '.png');
+
+                    Colors.find({'value.time': time}, function (err, sector_colors) {
+                        if (err) throw err;
+
+                        //   console.log('%s sector colors: %s', sector_colors.length, util.inspect(sector_colors, true, 5).substr(0, 300));
+
+                        var points = sector_colors.reduce(function (out, sc) {
+                            return out.concat(sc.value.data);
+                        }, []);
+
+                        var colors = [];
+
+                        points.forEach(function (point) {
+                            colors[point.ro] = point.value;
+                        });
+
+                        ico.io.faces(function (err, faces) {
+                            if (err) throw err;
+                            console.log('faces.length: %s', faces.length);
+                            ico.io.points(function (err, points) {
+                                if (err) throw err;
+
+                                var colored_points = points.map(function (point) {
+                                    return _.extend({color: colors[point.ro]}, point);
+                                })
+
+                                var polysphere = new ico_draw.Polysphere(1000, 500, colored_points);
+                                ico_draw.render_poly(polysphere, faces, function (err, canvas) {
+                                    ico_draw.canvas_to_file(canvas, time_file, done_drawing);
+                                });
+
+                            }, DETAIL);
+
+                        }, DETAIL);
+                    })
+                }
+
+                tap.test('ico-data', {timeout: 1000 * 1000, skip: false }, function (suite) {
+
+                    suite.test('rationalize and map reduce', {timeout: 1000 * 1000, skip: false }, function (lp_test) {
+
+                        manager.load_points(DETAIL, function () {
+
+                            function done() {
+                                manager.shut_down(function () {
+                                    cluster.disconnect(function () {
+                                        console.log('done with colorize_points for %s', connection);
+                                        lp_test.end();
+                                    })
+                                });
+                            }
+
+                            function do_sector_colors(time) {
+                                manager.set_time(time, function () {
+                                    manager.do(sector_colors, function (err, results) {
+                                        manager.rationalize_multiple_values('all', {
+                                            field: 'color',
+                                            detail: DETAIL,
+                                            'comp_value': path.resolve(SCRIPTS_ROOT, 'average_color_value.js'),
+                                            time: time
+                                        }, function (err, result) {
+
+                                            manager.map_reduce_sector_data(0, {
+                                                field: 'color', detail: DETAIL, time: time, output_collection: 'colors', 'sector': 'all'
+                                            }, function () {
+                                                _draw_sectors(time, function () {
+                                                    if (time < MAX_TIME) {
+                                                        do_sector_colors(time + 1);
+                                                    } else {
+                                                        done();
+                                                    }
+                                                });
+
+                                            });
+                                        })
+                                    }, {detail: DETAIL});
+
+                                })
+
+                            }
+
+                            var MAX_TIME = 30;
+                            do_sector_colors(0);
+
+                        });
+
+                    });
+
+                    suite.end();
+
+                });
+
+            })
+
+        }
+    )
+    ;
+
+} else {
+    icod.init_child();
+}
+
+```

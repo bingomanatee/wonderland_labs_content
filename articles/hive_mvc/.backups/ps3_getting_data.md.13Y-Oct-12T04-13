@@ -1,0 +1,541 @@
+Hive-MVC excels at allowing expanding resources to be put into granular files to reduce tactical code bloat. 
+
+As we write code to concatenate all pages of an event listing, it becomes clear that we need to insulate this process from the action file. 
+
+In `/frames/events/resources/models/eventful_model.js` we insert the following:
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var request = require('request');
+var _DEBUG = false;
+
+/* ------------ CLOSURE --------------- */
+
+var EVENTFUL_SEARCH_URL = 'http://api.eventful.com/json/events/search';
+var ITEMS_PER_PAGE = 50;
+
+/* ------------ CLOSURE --------------- */
+
+/** ********************
+ * Purpose: to proxy data from eventful
+ * @return void
+ */
+
+/* -------------- EXPORT --------------- */
+
+
+module.exports = function (apiary, cb) {
+
+    function _get_results(context, done) {
+
+        events = null;
+
+        function _add_to_events(err, res, body) {
+            if (err) return done(err);
+
+            try {
+                var new_data = JSON.parse(body);
+            } catch (err) {
+                return done(err);
+            }
+            if (new_data.events && new_data.events.event && new_data.events.event.length) {
+                if (events) {
+                    events.events.event = events.events.event.concat(new_data.events.event);
+                } else {
+                    events = new_data;
+                }
+            }
+
+            if (new_data.page_number < (new_data.page_count - 1)) {
+                _poll(new_data.page_number + 1);
+            } else {
+                // the exit condition
+
+                context.$out.set('events', events);
+                done();
+            }
+
+        }
+
+        function _poll(page) {
+            var params = {
+                url: EVENTFUL_SEARCH_URL,
+                qs: {
+                    app_key: apiary.get_config('eventful_auth_key'),
+                    location: context.location, keywords: context.search,
+                    page_size: ITEMS_PER_PAGE
+                }
+            };
+
+            if (context.radius) {
+                context.radius = parseInt(context.radius);
+                if (context.radius > 0) {
+                    params.qs.search_radius = context.radius;
+                }
+            }
+
+            if (page) {
+                params.qs.page_number = page;
+            }
+
+            console.log('polling events: %s', JSON.stringify(params));
+            request.get(params, _add_to_events);
+        }
+
+        _poll();
+    }
+
+    cb(null, {
+        name: 'eventful',
+        search: _get_results
+    })
+}
+
+```
+
+Note we are doing a few things here that are new:
+
+1. Expanding the number of requests per call to 50
+2. calling the API multiple times, once per page
+3. Adding the method that does so to a naked object that is accessible by the `model` method of the apiary or any action
+
+Now, we aren't limiting the ability to search eventful to only a single action. Our streamlined search action now reads:
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+/* -------------- EXPORT --------------- */
+
+module.exports = {
+
+
+    on_get_validate: function (context, done) {
+        done();
+    },
+
+    on_get_input: function (context, done) {
+        done()
+    },
+
+    on_get_process: function (context, done) {
+        done();
+    },
+
+    on_get_output: function (context, done) {
+        context.$out.set('events', '')
+        done();
+    },
+
+    /* -------------- POST ------------- */
+
+    on_post_validate: function (context, done) {
+        if (!context.search) {
+            // missing search term; we will use very brutal error handling here. No further processing will happen.
+            done('no search term found');
+        } else if (!context.location) {
+            done('no location found')
+        } else {
+            done();
+        }
+    },
+
+    on_post_input: function (context, done) {
+        this.model('eventful').search(context, done);
+    },
+
+    on_post_process: function (context, done) {
+        done();
+    },
+
+    on_post_output: function (context, done) {
+        done();
+    }
+}
+
+```
+
+We reduce the page display to list the count based on actual polling of the event array:
+
+``` ejs
+
+<% if (events) { %>
+<h2><%= events.events.event.length %> Results: </h2>
+```
+
+However all this extra data just emphasizes how much repetition exists in the dataset. This also means slower pages and poor readability; we are kind of honor bound to turn this into an HABTM related set of data nodes, and to use some client side frameworks to help dial down the noise.
+
+## Reducing redundant data
+
+There is huge repetition in the data. Creating one instance of each event and venue will do a lot of damage to the bloat and allow us to drive the navigation into a healthier system.
+
+refactoring the model, we now have the ability to view events and venues in the abstract. 
+
+#### eventful_model.js
+
+``` javascript
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var request = require('request');
+var crypto = require('crypto');
+var _DEBUG = false;
+
+/* ------------ CLOSURE --------------- */
+
+var API = 'http://api.eventful.com/json';
+var EVENTFUL_SEARCH_URL = API + '/events/search';
+var CATS_URL = API + '/categories/list';
+var ITEMS_PER_PAGE = 50;
+
+/** ********************
+ * Purpose: to proxy data from eventful
+ * @return void
+ */
+
+var hash_algorithm = crypto.getHashes()[0];
+
+function _create_eid(title, description) {
+    if (!description) description = '';
+
+    var shasum = crypto.createHash(hash_algorithm);
+
+    var data = new Buffer(title);
+    shasum.update(data, 'utf8');
+    if (description) {
+        data = new Buffer(description);
+        shasum.update(data);
+    }
+
+    var key = shasum.digest('hex');
+    //  console.log('title: %s, desc: %s, key: %s', title, description.substr(0, 20), key);
+    return key;
+}
+
+/* -------------- EXPORT --------------- */
+
+
+module.exports = function (apiary, cb) {
+
+    function _params(url, page_size, page_number) {
+        var out = {
+            url: url,
+            qs: {
+                app_key: apiary.get_config('eventful_auth_key')
+            }
+        };
+        if (page_number) {
+            out.qs.page_number = page_number;
+        }
+        if (page_size) {
+            out.qs.page_size = page_size;
+        }
+        return out;
+    }
+
+    function _get_results(query, done) {
+
+        events = null;
+
+        function _add_to_events(err, res, body) {
+            if (err) return done(err);
+
+            try {
+                var new_data = JSON.parse(body);
+            } catch (err) {
+                return done(err);
+            }
+
+            console.log('total items: %s, page_count: %s, page_number: %s', new_data.total_items, new_data.page_count, new_data.page_number);
+
+            if (new_data.events && new_data.events.event && new_data.events.event.length) {
+                if (events) {
+                    events.events.event = events.events.event.concat(new_data.events.event);
+                } else {
+                    events = new_data;
+                }
+            }
+
+            ['page_number', 'page_number', 'page_count'].forEach(function (field) {
+                new_data[field] = parseInt(new_data[field]);
+            });
+
+            if (new_data.page_number < (new_data.page_count - 1)) {
+                _poll(new_data.page_number + 1);
+                console.log('.... loop again');
+            } else {
+                // the exit condition
+                console.log('.... done looping');
+
+                done(null, events);
+            }
+
+        }
+
+        function _poll(page) {
+            var params = _params(EVENTFUL_SEARCH_URL, ITEMS_PER_PAGE, page);
+            params.qs.date = 'Today';
+
+            params.qs.location = query.location;
+            if (query.search)  params.qs.keywords = query.search;
+            if (query.category) params.qs.category = query.category;
+
+            if (query.radius) {
+                query.radius = parseInt(query.radius);
+                if (query.radius > 0) {
+                    params.qs.search_radius = query.radius;
+                }
+            }
+
+            console.log('polling events: %s', JSON.stringify(params));
+            request.get(params, _add_to_events);
+        }
+
+        _poll();
+    }
+
+
+    /**
+     * Takes the data stored in events.events.event array and normalizes it.
+     *
+     * @param events
+     * @returns {{events: {}, venues: {}}}
+     * @private
+     */
+    function _normalize_results(events) {
+
+        var venues = {}; // indexed by ID
+        var event_desc = {}; // indexed by eid
+
+        events.forEach(function (event) {
+
+            if (!venues[event.venue_id]) {
+                data = _.pick(event,
+                    'venue_id', 'venue_name', 'venue_display', 'venue_url',
+                    'city_name', 'region_name', 'region_abbr', 'postal_code', 'country_name', 'latitude', 'longitude');
+                data.eids = [];
+                venues[data.venue_id] = data;
+            }
+
+            var e_data = _.pick(event, 'title', 'description', 'start_time', 'all_day', 'end_time', 'venue_id');
+            var eid = _create_eid(e_data.title, e_data.description);
+
+            venues[data.venue_id].eids.push(eid);
+
+            if (!event_desc[eid]) {
+                var ed = _.pick(e_data, 'title', 'description', 'venue_id');
+                ed.showtimes = [];
+                ed.eid = eid;
+                event_desc[eid] = ed;
+            }
+            event_desc[eid].showtimes.push(_.pick(event, 'start_time', 'end_time', 'all_day'));
+        })
+
+        return {
+            events: event_desc,
+            venues: venues
+        }
+
+    }
+
+    var cat_cache = null;
+
+    function _categories(callback) {
+        if (cat_cache) {
+            callback(null, cat_cache);
+        } else {
+            var params = _params(CATS_URL);
+            console.log('getting cats: %s ', util.inspect(params).substr(0, 20));
+            request.get(params, function (err, req, body) {
+                if (err) {
+                    callback(err);
+                } else {
+                    cat_cache = body ? JSON.parse(body).category : [];
+                    callback(null, cat_cache);
+                }
+            });
+        }
+    }
+
+    var model = {
+        name: 'eventful',
+        search: _get_results,
+        normalize: _normalize_results,
+        venue_ticket: _venue_ticket,
+        categories: _categories
+    };
+
+    cb(null, model);
+}
+
+```
+
+#### search_action.js
+We also refactor the controller to process this dual feed of information
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+/* -------------- EXPORT --------------- */
+
+module.exports = {
+
+
+    on_get_validate: function (context, done) {
+        done();
+    },
+
+    on_get_input: function (context, done) {
+        var model = this.model('eventful');
+
+        model.categories(function (err, cats) {
+            context.cats = cats;
+            done();
+        })
+    },
+
+    on_get_process: function (context, done) {
+        done();
+    },
+
+    on_get_output: function (context, done) {
+        context.$out.set('events', '')
+        context.$out.set('cats', context.cats);
+        done();
+    },
+
+    /* -------------- POST ------------- */
+
+    on_post_validate: function (context, done) {
+         if (!context.location) {
+            done('no location found')
+        } else {
+            done();
+        }
+    },
+
+    on_post_input: function (context, done) {
+        var model = this.model('eventful');
+        model.search(context, function (err, event_data) {
+            if (err) {
+                return done(err);
+            }
+            console.log('event_data: %s', util.inspect(event_data, true, 4).substr(0, 200));
+            context.event_data = event_data;
+            model.categories(function (err, cats) {
+                context.cats = cats;
+                done();
+            })
+        });
+    },
+
+    on_post_process: function (context, done) {
+        if (context.event_data.events.event.length > 0) {
+
+            var norm_data = this.model('eventful').normalize(context.event_data.events.event);
+            console.log('eee: %s', util.inspect(context.event_data.events.event, true, 5).substr(0, 200));
+            _.each(norm_data, function (items, name) {
+                // items are a hash, keyed by ID. We only need the values of the hash.
+                var data =  _.values(items);
+                console.log('%s: %s', name, items.length);
+                context.$out.set(name, data);
+            });
+        } else {
+            context.$out.set('events', []);
+            context.$out.set('venues', []);
+        }
+        done();
+    },
+
+    on_post_output: function (context, done) {
+        context.$out.set('cats', context.cats);
+        done();
+    }
+}
+
+```
+
+#### search_view.html
+and change the view to reflect two streams of information:
+
+``` html
+
+<% if (events ) { %><h1>Search again</h1><% } else { %><h1>Search for events </h1><% } %>
+
+<form class="form-horizontal" id="event-search-form" method="POST" action="/search">
+    <div class="control-group">
+        <label class="control-label" for="search-input">Location</label>
+
+        <div class="controls">
+            <input type="text" name="location" id="location-input" required placeholder="Search for location">
+
+            <p>Within <input type="number" min="0" max="10000" name="radius" value="10"/> miles</p>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label" for="category-input">Category</label>
+
+        <div class="controls">
+            <select name="category" id="category-input">
+                <option value="">(any)</option>
+                <% cats.forEach(function(cat){ %>
+                <option value="<%= cat.id %>"><%= cat.name %></option>
+                <% }) %>
+            </select>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label" for="search-input">Search Term (optional)</label>
+
+        <div class="controls">
+            <input type="text" name="search" id="search-input" placeholder="Search for events">
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn">Search for Events</button>
+        </div>
+    </div>
+</form>
+
+<% if (events) { %>
+<h2> Results: </h2>
+
+<div class="row-fluid">
+    <div class="span6">
+        <h3><%= events.length %> Events</h3>
+        <% events.forEach(function(event){ %>
+        <h4><%= event.title %></h4>
+
+        <% }) %>
+    </div>
+    <div class="span6">
+        <h3><%= venues.length %> Venues</h3>
+        <% venues.forEach(function(venue){ %>
+        <h4><%= venue.venue_name %></h4>
+        <% }) %>
+    </div>
+
+</div>
+<% } // if events
+%>
+
+```
+
+## ANGRY ANGRY MANATEES
+
+Doing so cleans up the data well enough to get a very clean (if uninformative) view of our data. Enough to make a depressing discovery -- these events do NOT include first-run movies, just artsy fartsy cult movies events etc. So we will need a new API
+
+<button class="btn btn-pimary btn-large" onClick="document.location='ps4_a_new_hope'">TMSAPI: a new hope</button>

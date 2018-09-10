@@ -1,0 +1,57 @@
+There are two basic coordinate systems underpinning most SVG/Canvas drawing tools:
+
+1. **absolute** -- that is, specifying pixel by pixel where you want your objects to go to.
+2. **transformational** defining a hierarchy of centers, transforms, rotates and scaling of target coordinates. 
+
+The web introduces a third set of coordinate systems in DOM: **percentage** coordinates; that is, each box's position, width and height can be defined as absolute or percentages of the container. I say "system" but in reality, the system is very "gappy" -- you can't easily center one object relative to another, for instance. 
+
+Percentage based calculus is very useful in many situation where you don't know the bounding objects' coordinate system. 
+
+RaphaelDOM overlays a coordinate system based on percentages over the Raphael SVG drawing system. 
+
+Here is an example of raphaelDOM in action: 
+
+<iframe width="80%" style="margin: 2em" height="800" src="http://jsfiddle.net/bingomanatee/kD9Rf/embedded/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+the draw method is tied to a resize listener, but the dimensions are all calculated based on internal subdivisions of the containing `div` element. 
+
+## Building Blocks of RaphaelDOM
+
+
+## Boxes
+
+The basic building blocks of raphaelDOM are boxes. A box is a region of the containing panel, and can be nested.
+
+When the root Box's `draw()` method is called, an SVG element is added to the page whose dimensions and appearance build from the Box's appearance, and the draw type that the Box has been set to. 
+
+### Constructor(name, configuration, parent, paper);
+
+Creating a box uses the `new` method, though once you have your root box, you'll probably want to use the `child()` factory off of the base (or other child) boxes.
+* **name** is a string. It also becomes the default title of the object if title is not explicitly set. 
+* **configuration** is an object; most properties -- width, anchor, drawType -- can be specified in configuration, or via post-creation set- methods.
+* **parent** can be another box or a DOM element. 
+* **paper** is a Raphael element; if absent, will be inherited from a parent box. 
+ 
+#### Width and Height
+
+Each box has a width and height that is either absolute or a percent string(`"&quot;33%&quot;`) based on its containing Box or DOM element. 
+
+``` javascript
+var box = new raphaelDOM.box('root box', {}, $('my-div'), paper).setWidth(300).setHeight('50%');
+```
+A boxes' default size is 100% width and height. 
+
+#### Margin and Padding
+
+Margins and padding reduce (or increase!) the box's dimensions. 
+* **margin** offsets the box relative to the parent's inner width and inner height. When you set margin, the box's width and height will NOT be automatically reduced -- you will have to adjust the width/height yourself if you want it to be contained within its parent. 
+* **padding** determines the inner width and height of the box, relative to its own size.  A box with no child boxes won't be affected by changing its padding.
+
+Margin and Padding can be set to a single value, OR you can set Margin and Padding separately for each side. 
+
+``` javascript
+var box = new raphaelDOM.box('root box', {}, $('my-div'), paper).setWidth(200).setHeight(200).setPadding('15%');
+var innerBox = box.child('innerBox').setMargin(10)
+var child = box.child('child').setWidth('100%').setHeight('100%');
+```
+The innerBox's

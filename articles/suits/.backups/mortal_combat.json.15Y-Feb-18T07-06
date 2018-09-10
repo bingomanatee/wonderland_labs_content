@@ -1,0 +1,12 @@
+{
+    "file_name": "mortal_combat",
+    "title": "Mortal Combat",
+    "intro": "Mortal combat has specific rules",
+    "revised": "2015-02-18 07:06",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "suits",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

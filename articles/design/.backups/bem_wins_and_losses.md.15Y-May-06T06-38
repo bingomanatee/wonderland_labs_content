@@ -1,0 +1,37 @@
+[BEM](https://en.bem.info/method/) is a set of principles in CSS design. On the face of it it is a naming convention for CSS but in practice it is a deeper set of principles about how and when you use names and what styles and css methodology you do and do not use. 
+
+## The Why of Fry
+
+Before describing the what a note on the why: 
+
+The premise here is that CSS rules that overlap obscure and frustrate developers on large teams and projects (and large teams with large projects). The chance for style definitions intended for one context spilling into another, and for frustrated developers to `!important;` -stamp their work just to force their desired outcomes. 
+
+consider this set of tags:
+
+```` html
+
+<html>
+  <section class="topnav">
+     <div id="welcome">
+       <h1>Welcome to <a href="/" class="header-link">Dinosaurs.com</a></h1>
+     </div>
+  ...
+   </section>
+</html>
+
+````
+
+How many ways can css affect the link? 
+
+```` css
+html h1 {color: red}
+h1.link {color.green}
+a {color: blue}
+#welcome {color: black}
+section a {color: orange}
+h1 {color: yellow}
+````
+
+This is a significant problem with CSS. All of these technically valid patterns of style designation logjam and when a problem is detected, backing out of it in a large site with many existing markup tags is a nightmare. 
+
+If you're curious click <a class="btn" href="https://jsfiddle.net/bingomanatee/je7t25rd/embedded/result/">Here</a>.

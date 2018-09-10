@@ -1,0 +1,10 @@
+{
+    "file_name": "hive_model",
+    "title": "Hive-Model",
+    "intro": "a memory model; a handy tool for simple record processing",
+    "revised": "2013-07-04 12:05",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "hive"
+}

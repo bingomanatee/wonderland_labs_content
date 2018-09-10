@@ -1,0 +1,10 @@
+Although only TMSAPI data has first-run films, both data sources have a place; it would be a good idea to create s REST service that combines both data sources. 
+
+Looking at both sources they have the same fundamental fields: 
+
+* title
+* description(s)
+* venue data 
+* time(s)
+
+Lets create a unified data source with records, storing the source and presentation records separately.

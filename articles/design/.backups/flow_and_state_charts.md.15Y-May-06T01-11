@@ -1,0 +1,51 @@
+Flowcharts and State Charts are graphs (in the sense of node/line or database relations) and as such, there is no "Right" way to design them. However, there are ways that better document the intended flow better than others. 
+
+![ciec.png](/blog_image/ciec.png)
+
+This is a flow diagram I recently did for the version of spree employed at [TheRealReal](http://www.therealreal.com), my employer. There are a few choices I made that in my opinion improve readability and are good rules to follow when graphing flow. 
+
+## Always keep the main branch linear and vertical
+
+There is in general one main flow which is the median case scenario. 
+
+This main branch should be direct, linear and prominent. When possible keep it on the left edge, or if branching is significant, as a center axis. Forcing the user to take a twisting journey to follow the most common flow disguises the fact that it is the most common flow. 
+
+Even in the sub-states like Return, where there is a main flow, vertical paths are used to emphasize the direction of flow. 
+
+In the flow, where paths are two-way, the nodes are kept as horizontal peers. This too uses position as a storytelling tool. 
+
+## Highlight the sub-states of the chart with boxes or swimlines
+
+Generally, there will be at least one or two larger groupings of boxes within the flow. Document and call those groups out; they will add context to the story you are trying to tell. 
+
+## Replace "spider" branches with summary links
+
+All the states in this diagram in the received state can link to "Consigner Return Requested" or "Rejected". Rather than create a massive spiderweb of links, I created an abstract link between the received state to the consigner-return requested. Creating literal branches between all the nodes that are actually linked could have been done but it would have created a lot of visual weight and detracted from the basic flow of information.
+
+## Have a clear and visually extreme end point. 
+
+In UML state charts that's the double-circle. In general this should be at the bottom of your main branch but as in this diagram where more than one end point exists, make those multiple end scenarios clear. If possible they should all flow down to the bottom of the page; where inconvenient (as in here) make them as prominent as possible. 
+
+# Some things not shown here
+
+...or if they are, only through omission
+
+## Don't flood nodes with metadata
+
+Its tempting to tell whole paragraphs inside your nodes; don't. Use figure numbers and subtext or margin notes if you feel moved towards verbosity. 
+
+## Use multiple pages for diagrams that get too busy
+
+Too busy is very subjective but when the thread is lost, use multiple pages for state with joining branches, and/or nest diagrams. In a similar vein, where multiple steps are linear (box a joins to b, b to c, c to d) compress the linear branch into a single box. If the need exists to be more explicit  put a numbered list inside the node. 
+
+## Omit obvious logic gates
+
+Logic gates are the "Diamond" place where multiple branches leave from a single decision point. In general those are inferable from the resulting destinations so before making those "branch nodes" consider whether the point can be made without them.
+
+## Always use directional arrows on your branches
+
+Lines without arrows don't define the possible flows. One-way and two way arrows as shown here, keep the logic moving only in the possible directions. Knowing which paths are one-way and which are two-way is a critical part of understanding the nature of an activity. 
+
+## Vary size, shape and colors of boxes as little as possible
+
+Heavy coloration is almost always a distraction for information graphics. A single color theme throughout -- or none -- prevents attention from being pulled into questions of intent and inference. Similarly, resist the urge to use icons unless (as in a network diagram) they truly communicate state and class of things.

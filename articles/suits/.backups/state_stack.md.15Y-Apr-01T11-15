@@ -1,0 +1,31 @@
+Your state stack reflects your current energy, readiness and attitude, and accrued damage. It is a stack or series of cards in this order:
+
+* damage (face down, at 90 degrees) cards or red poker chips
+* stun (face up at 90 degrees) cards or blue poker chips
+* defense (face down) cards or white poker chips
+* initiative (face up) cards or a red poker chip
+* action (face down) cards or white poker chips
+
+**Note**  there are circumstances when you will not have an initiative card, in which case all the topmost cards are considered defense cards.
+
+Everyone starts with four face down cards. 
+
+## Setting initiative
+
+In the beginning of each round, if you do not have a flipped up initiative card, you flip over one or more of your face down cards and keep the highest card that is not greater than your Speed. 
+
+* If none of your cards are that high you must put your initiative card at the front of your stack - meaning you don't have any action cards and cannot act that round. 
+* If your initiative card is not greater than your speed you can put it in between your blank cards, dividing your stack into action and defense cards.
+
+## Order of action
+
+Action is resolved in phases, counting down from four to one. 
+
+* On the fourth phase, everyone with four or more action cards acts, in descending order of number of initiative cards, then in descending order of the value of their initiative card. 
+* On phase three to one, players with those many action cards act in descending order of initiative cards. 
+* On phase zero, players with no action cards can boost up their stack.
+* lastly, anyone without an initiative card can set their initiative. 
+
+
+
+###

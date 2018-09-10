@@ -1,0 +1,15 @@
+Planets are collections of points on a spherical representation of a world. Planets are created by tessellating (dividing) the threeD data of the higher level to a certain number of iterations, each time creating vertices at a certain level of detail.
+
+The level of detail is an integer; detail 0 is the most detailed level of data, and the highest level of detail is the one with 12 points and 20 sectors. 
+
+They have the following properties: 
+
+#### vertices [{Three.js Vector3}]
+
+An array of three.js Vector3 objects. each has a Vector2 coordinate at property `uv`. 
+
+#### Sectors
+
+The Planet begins with a definition of 20 faces made up of 12 vertices. Each one of these faces is a root sector connecting 3 vertices. 
+
+As the tessellation proceeds, each of these faces are broken into four faces by adding a midpoint between each point and connecting each corner to two midpoints, then adding a fourth face by connecting the midpoints. The midpoints are at an added detail. This set of three points, and the level of detail they represent, are saved as a sector.

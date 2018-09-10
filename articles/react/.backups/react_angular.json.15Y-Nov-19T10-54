@@ -1,0 +1,17 @@
+{
+    "file_name": "react_angular",
+    "title": "The WTF index",
+    "intro": "Comparing Angular and React from a \"When Things Go Wrong\" point of view.",
+    "revised": "2015-11-19 10:54",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "react",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

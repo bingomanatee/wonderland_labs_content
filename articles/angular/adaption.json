@@ -1,0 +1,12 @@
+{
+    "file_name": "adaption",
+    "title": "Automating the facade pattern in Angular",
+    "intro": "Very often you have a class with subobjects that solve tasks for the parent class; this shows how you can bridge methods from the child class to the parent class automatically.",
+    "revised": "2015-06-14 08:02",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "angular",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

@@ -1,0 +1,10 @@
+{
+    "file_name": "hive_components",
+    "title": "The Hive family of Node.js modules",
+    "intro": "A family of components that support the Hive-MVC",
+    "revised": "2013-07-04 12:17",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "hive"
+}

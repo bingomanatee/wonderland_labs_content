@@ -1,0 +1,7 @@
+The DataHero blog is a fairly standard -- by which I mean, adhering to current conventions of design and layout -- web page. It illustrates how you can have a "check in a box" page that has swaths of metadata and still detract from your basic goal of getting clickthrough and reading.
+
+![bd1.png](/blog_image/bd1.png)
+
+This layout puts a lot of the articles below the fold; most criminally, by repeating the article title in image form, adding no information but  increasing scroll. 
+
+Currently there is a lot of trust put in the readers' willingness to scroll which was very much not the findings during dot com one, in which it was taken that users won't scroll and content below the fold is ignored. Too much page compression does create user shock but too little as shown here puts a lot of faith in the top two articles' ability to pull the reader in. I easily took the content into 3 1/2 articles above the fold.

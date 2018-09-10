@@ -1,0 +1,109 @@
+A host of global data have been added to the GeoSphere project. 
+
+Note, most of the Climate classes take one of two arguments: 
+
+1. a number, by which they create their own Planet with the given resolution
+2. a planet, which they add data to. 
+
+By this method, you can have many planets with different resolutions for your climate data, or one shared planet with all the data embedded in it. 
+
+As a reminder, [Planets](planets) store data on given vertexes in a separate registry. You can extract a vertex data from the planet directly or by iterating over its vertices:
+
+``` javascript
+
+        var albedo = new Albedo(5);
+
+        albedo.load(function () {
+            console.log('vertex 1 albedo: %s', albedo.planet.vertex_data(1, 'albedo')) // 0.100
+            albedo.planet.vertices(function(vertex){ console.log('vertex %s albedo', 
+               vertex.index, vertex.data('albedo')); 
+               });
+          });
+```
+
+## Albedo data
+
+![albedo.png](/blog_image/albedo.png)
+
+Albedo is the measure of how much of the solar energy is reflected by the earths' surface. Surface albedo data is extracted from [NASA data](http://iridl.ldeo.columbia.edu/SOURCES/.NASA/.ERBE/.ALL/.clear-sky/.albedo/datafiles.html) and is stored in the planet's "albedo" data channel. The albedo data is a number 1.100.
+
+``` javascript
+
+        var albedo = new Albedo(5);
+
+        albedo.load(function(){ console.log('albedo loaded');});
+```
+
+## Biome
+
+(being upgraded)
+
+## Cloud Cover
+
+![cloud_cover_2.png](/blog_image/cloud_cover_2.png)
+
+Cloud cover data is the monthly average cover for clouds over the year. The ultimate goal is to model cloud generation directly but for now this provides an initial basis for calculating solar energy.
+
+The data is based on a set of grey scale images from [NASA Snapshots](http://neo.sci.gsfc.nasa.gov/view.php?datasetId=MYDAL2_M_CLD_FR&year=2012) and is stored in the planets' 'cloud_cover' vertex data as an array of 12 numbers.
+
+``` javascript
+        var cover = new Cloud_Cover(4);
+
+        var gate = Gate.create();
+        console.log('new cloud cover');
+        cover.init(function () {
+            console.log('cloud cover initialized');
+            _.range(0, 12).forEach(function (month) {
+                var ll = gate.latch();
+                process.nextTick(function(){
+
+                    cover.planet.vertices(function (vertex) {
+                        var cc = vertex.data('cloud_cover');
+                        vertex.data('color', cc[month]);
+                    });
+
+
+                  cover.planet.draw_triangles(720, 360,
+                        path.resolve(WRITE_ROOT, 'cloud_cover_' + month + '.png'),
+                       ll);
+                })
+
+            });
+
+            gate.await(function () {
+                console.log('done drawing clouds');
+            })
+
+        })
+
+```
+
+
+## Elevation
+
+![earth_tesselated.png](/blog_image/earth_tesselated.png)
+
+Based on  [NOAA Data](http://www.ngdc.noaa.gov/mgg/topo/report/), the `GLOBE_Data_Reader` class returns the height of a point based on a set of binary data tiles by reading a speck or row of memory of the tiles. The data returned is height above sea level in meters. 
+
+Note that the GLOBE_data does not have a planet property, unlike the climate modules. 
+
+It can populate a planet with data from its tiles:
+
+``` javascript
+
+        var planet = new Planet(4);
+        var index = new GLOBE_data_reader.Index(GLOBE_DATA);
+        index.init(function () {
+            index.set_planet_elevation(planet, 'height', function () {
+                console.log('planet data set');
+             });
+       });
+```
+
+Because the data is kept on file, all the polling methods are asynchronous: 
+
+``` javascript
+    index.u_v_height(0.5, 0.5, function(err, height){
+      console.log('height at 0.5, 0.5 == %s', height);
+});
+```

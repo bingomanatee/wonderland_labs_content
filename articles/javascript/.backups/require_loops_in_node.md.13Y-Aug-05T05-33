@@ -1,0 +1,274 @@
+Its fairly easy to create require paradoxes in Node.js. 
+
+## Attempting Cross References
+Say you have a library folder like this: 
+
+```
+
+/lib/
+     index.js
+     Resource1.js
+     Resource2.js
+
+```
+
+and you want index to be the "registry" for resources. These resource refer to each other.
+
+``` javascript
+module.exports = {
+
+    Res1: require('./Res1'),
+    Res2: require('./Res2')
+};
+
+```
+
+so now, you think, "great, now I can refer to my various resources by loading the index file."
+
+#### Res1.js
+
+``` javascript
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+var index  = require('./index');
+var RES2IS = new index.Res2().i_am();
+
+function Res1(params) {
+
+    this.res2is = RES2IS
+}
+
+_.extend(Res1.prototype, {
+    i_am: function () {
+        return 'Res1';
+    }
+});
+
+module.exports = Res1;
+
+```
+
+#### Res2.js
+
+``` javascript
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+var index  = require('./index');
+var RES1IS = new index.Res1().i_am();
+
+function Res2(params) {
+    this.res1is = RES1IS;
+}
+
+_.extend(Res2.prototype, {
+    i_am: function () {
+        return 'Res2';
+    }
+});
+
+module.exports = Res2;
+```
+
+### The Test
+
+So now we put it to the test. 
+``` javascript
+
+var tap = require('tap');
+var util = require('util');
+
+var index = require('./../index');
+console.log('index: %s', util.inspect(index));
+
+tap.test('Farnsworth', {timeout: 1000 * 10, skip: false }, function (suite) {
+
+    suite.test('Res1', {timeout: 1000 * 10, skip: false }, function (res1test) {
+        var res1 = new index.Res1();
+        res1test.equal( res1.res2is(), 'Res2', 'res2 reference in res1');
+        res1test.end();
+    });
+
+    suite.test('Res2', {timeout: 1000 * 10, skip: false }, function (res2test) {
+        var res2 = new index.Res2();
+        res2test.equal( res2.res1is(), 'Res1', 'res2 reference in res1');
+
+        res2test.end();
+    });
+
+    suite.end();
+
+});
+
+```
+
+... and the result is an epic fail:
+
+``` bash
+/usr/local/bin/node test/farnsworth.test.js
+index: { Res1: [Function: Res1], Res2: [Function: Res2] }
+TAP version 13
+# Farnsworth
+# Res1
+not ok 1 TypeError: undefined is not a function
+  ---
+    type:    TypeError
+    message: undefined is not a function
+    code:    called_non_callable
+    errno:   ~
+    file:    /Users/dave/Documents/node/farnsworth/Res1.js
+    line:    9
+    column:  19
+    stack:   
+      - new Res1 (/Users/dave/Documents/node/farnsworth/Res1.js:9:19)
+      - Test.<anonymous> (/Users/dave/Documents/node/farnsworth/test/farnsworth.test.js:13:20)
+      - Test.EventEmitter.emit (events.js:117:20)
+      - Test.emit (/Users/dave/Documents/node/farnsworth/node_modules/tap/lib/tap-test.js:104:8)
+      - Test.Harness.process (/Users/dave/Documents/node/farnsworth/node_modules/tap/lib/tap-harness.js:87:13)
+      - process._tickCallback (node.js:415:13)
+      - Function.Module.runMain (module.js:499:11)
+      - startup (node.js:119:16)
+      - node.js:901:3
+    thrown:  true
+  ...
+# Res2
+not ok 2 TypeError: undefined is not a function
+  ---
+    type:    TypeError
+    message: undefined is not a function
+    code:    called_non_callable
+    errno:   ~
+    file:    /Users/dave/Documents/node/farnsworth/Res2.js
+    line:    9
+    column:  19
+    stack:   
+      - new Res2 (/Users/dave/Documents/node/farnsworth/Res2.js:9:19)
+      - Test.<anonymous> (/Users/dave/Documents/node/farnsworth/test/farnsworth.test.js:20:20)
+      - Test.EventEmitter.emit (events.js:117:20)
+      - Test.emit (/Users/dave/Documents/node/farnsworth/node_modules/tap/lib/tap-test.js:104:8)
+      - Test.Harness.process (/Users/dave/Documents/node/farnsworth/node_modules/tap/lib/tap-harness.js:87:13)
+      - process._tickCallback (node.js:415:13)
+      - Function.Module.runMain (module.js:499:11)
+      - startup (node.js:119:16)
+      - node.js:901:3
+    thrown:  true
+  ...
+
+1..2
+# tests 2
+# fail  2
+
+Process finished with exit code 0
+
+```
+
+## A simple patch (fails). 
+
+What if we require index in the constructors?
+
+``` javascript
+
+function Res1(params) {
+    var index  = require('./index');
+    this.res2is = new index.Res2({}).i_am();
+}
+```
+
+#### Test Results
+
+``` javascript
+/usr/local/bin/node test/farnsworth.test.js
+index: { Res1: [Function: Res1], Res2: [Function: Res2] }
+TAP version 13
+# Farnsworth
+# Res1
+not ok 1 RangeError: Maximum call stack size exceeded
+  ---
+    type:    RangeError
+    message: Maximum call stack size exceeded
+    code:    stack_overflow
+    errno:   ~
+    stack:   
+      - 
+    thrown:  true
+  ...
+# Res2
+not ok 2 RangeError: Maximum call stack size exceeded
+  ---
+    type:    RangeError
+    message: Maximum call stack size exceeded
+    code:    stack_overflow
+    errno:   ~
+    stack:   
+      - 
+    thrown:  true
+  ...
+
+1..2
+# tests 2
+# fail  2
+
+Process finished with exit code 0
+```
+
+## The Solution
+
+The only way to resolve this is to embed the require inside of a method: 
+
+#### Res1
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+function Res1(params) {
+}
+
+_.extend(Res1.prototype, {
+    res2is: function(){
+        var Res2 =  require('./Res2');
+        return new Res2({}).i_am();
+    },
+
+    i_am: function () {
+        return 'Res1';
+    }
+});
+
+module.exports = Res1;
+```
+
+#### Res2
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+
+
+function Res2(params) {
+}
+
+_.extend(Res2.prototype, {
+    res1is: function(){
+        var Res1 =  require('./Res1');
+        return new Res1({}).i_am();
+    },
+
+    i_am: function () {
+        return 'Res2';
+    }
+});
+
+module.exports = Res2;
+```

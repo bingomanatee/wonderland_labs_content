@@ -1,0 +1,23 @@
+One of the absences I've been feeling around the react framework is the loss of the DI utility in Angular. For those who haven't got deep enough in Angular to do serious testing (And yes you _should_ feel bad!) the module framework probably feels like a huge timehole. However when you do get into areas of testing where mocking and stubbing become paramount, the DI framework is a crucial part of the equation. 
+
+Given that DI is broadly documented I'll do a "TLDR" here and say the idea behind it is that if you use a resource framework to get the components (classes, constants, classes) of your application from, you can then replace some or most of them with stand-ins that you "turk" for the purposes of testing. 
+
+I'm doing something here I don't usually do which is advocate a technology before I have a large enough bases for analysis but my initial experiments in using DI + react have been extremely rewarding and I wanted to pass this on early for those looking for a solution in this area.
+
+## React DI vs. Bottle.js DI 
+
+Just to create a frame of reference for this, Angular's model of DI equates to this: 
+
+1. Create a *module*, a namespace that is associated with the global `angular` object. (no relation to the node module/commonJS module)
+2. Every resource associated with that module is spawned with a function that ties the end product to a name, and pulls in previously defined resources as dependencies. 
+3. Modules can be composed into other modules, mixing/merging their definitions into the parent.
+
+This last part is a real magical thing and a source of chaos and ambiguity; for instance, 
+
+* you have a module `foo` which has resources 'alpha', 'beta', and 'gamma'. 
+* you hvae a module `bar` which has resources 'beta', 'omega', and 'lambda'.
+* you have a module `vey` which composes `[foo, bar]` as sources. 
+
+What is the definition of 'beta' in vey? foo's beta? bar's beta? crash and burn? And why can't we just access them directly as bar.beta or foo.beta? grr. 
+
+Bottlejs

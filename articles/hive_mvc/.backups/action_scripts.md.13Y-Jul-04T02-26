@@ -1,0 +1,175 @@
+The script sequence for an action is more involved than the typical MVC action. This is because effort is made to mitigate the "callback pyramid of doom" by extracting the elements of a callback sequence into a consistent tier of activity. 
+
+The methods in an action script that are called, in sequence, are 
+
+* **on_validate**(context, done)
+* **on_input**(context, done)
+* **on_process**(context, done)
+* **on_output**(context, done)
+
+Defining these methods in your action script for these methods is optional; any or all of them can be left out of your script.
+
+The "done" callback function must be called at some point for each of your actions' methods. 
+
+The intended semantics for these methods is as follows:
+
+#### on_validate
+
+This method is used to validate that all required fields from the input of the request are present and are in the acceptable format/range. It also allows you do do ACL checks on the logged-in member for the downstream actions. 
+
+#### on_input
+
+This method is for extracting input from the request, the file system and/or one or more models as needed. Some further validation may be done here based on the found data. 
+
+#### on_process
+
+This method is for interpreting, writing and saving data to the file system, models, etc. Anything that changes state should go here. 
+
+#### on_output
+
+Any final preparation of content for the benefit of the template goes here.
+
+## Arguments
+
+* **context** -- a state-specific record of the current request; [Click here](context) for more details.
+* **done** -- a function to call on completion of an action. No arguments are necessary, but it does accept an error. Calling done(err) is a very messy way to abort a request, and will dump a messy return block to the browser; it is better to use `context.$send({content})` or `context.$go(url)`. 
+
+#### example: returning a blog article 
+
+``` javascript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var _DEBUG = false;
+var marked = require('marked');
+var hyperlink = require(path.resolve(__dirname, '../../../../lib/hyperlink_marked.js'));
+
+/* ************************************
+ * 
+ * ************************************ */
+
+/* ******* CLOSURE ********* */
+
+var file_edit_link = _.template('/admin/blog_edit/<%= file_name %>');
+
+var folder_edit_link = _.template('/admin/blog_edit/<%= folder %>/<%= file_name %>');
+
+function edit_link(article) {
+	if (article.folder) {
+		return folder_edit_link(article);
+	} else {
+		return file_edit_link(article);
+	}
+}
+
+/* ********* EXPORTS ******** */
+
+module.exports = {
+
+/**
+* initial validation: ensuring a file name has been passed, and that the named article exists.
+*/
+	on_validate: function (context, callback) {
+		if (!context.file_name) {
+			callback(new Error('No file_name'))
+		} else {
+			var model = this.model('blog_article');
+			model.exists(context, function (has_article) {
+				if (!has_article) {
+/*
+* rerouting on case of missing article
+*/
+					if (context.folder) {
+						context.$go('/admin/blog/create/' + context.folder + '/' + context.file_name, callback);
+					} else {
+						context.$go('/admin/blog/create/' + context.file_name, callback);
+					}
+				} else {
+					callback();
+				}
+			})
+		}
+	},
+
+/** **********
+* pulling an article out of the model
+*/
+	on_input: function (context, callback) {
+		var model = this.model('blog_article');
+		model.get(context, function (err, article) {
+			if (err) {
+				return callback(err);
+			}
+/** ************
+* Recording the article for use in the view
+*/
+			context.$out.set('article', article);
+			callback();
+		})
+	},
+
+	on_process: function (context, callback) {
+/* ****************
+* passing the rendered HTML and a link to edit the article to the view
+*/
+		context.$out.set('html',marked( hyperlink(context.$out.get('article').content, context)));
+		context.$out.set('edit_link', edit_link(context.$out.get('article')));
+		callback();
+	},
+
+/* ******************
+* passing an ACL permission to the view
+*/
+	on_output: function(context, done){
+		member_model = this.model('member');
+		member_model.ican(context, ['edit article'] , function(){
+			context.$out.set('iCanEditArticle', true);
+			done();
+		},
+		function(){
+			context.$out.set('iCanEditArticle', false);
+			done();
+		})
+	}
+
+} // end action
+
+```
+
+## Forking Processing by Method
+
+Some actions map 1:1 to a single method; others have different processing paths for each method. 
+
+There are method-specific handlers for handling specific routes. Do not try to mix single-response methods (`on_process`) with method-specific methods (`on_get_process`)
+
+### Get Routes
+
+* **on_get_validate**
+* **on_get_input**
+* **on_get_process**
+* **on_get_output**
+
+### Put Routes
+
+* **on_put_validate**
+* **on_put_input**
+* **on_put_process**
+* **on_put_output**
+
+
+### Post Routes
+
+* **on_post_validate**
+* **on_post_input**
+* **on_post_process**
+* **on_post_output**
+
+
+### Delete Routes
+
+* **on_delete_validate**
+* **on_delete_input**
+* **on_delete_process**
+* **on_delete_output**

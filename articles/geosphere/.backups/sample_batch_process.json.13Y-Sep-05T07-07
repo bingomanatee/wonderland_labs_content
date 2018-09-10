@@ -1,0 +1,12 @@
+{
+    "file_name": "sample_batch_process",
+    "title": "A sample batch process for icosahedron data",
+    "intro": "A test case for processing geographic data in bulk with the Icosahedron suite",
+    "revised": "2013-09-05 07:07",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

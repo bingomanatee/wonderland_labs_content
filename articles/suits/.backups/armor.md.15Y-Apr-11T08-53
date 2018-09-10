@@ -1,0 +1,106 @@
+<style>
+        table.weaponTable {
+            border: 1px solid black;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+width: 100%;
+        }
+
+        .weaponTable td, .weaponTable th {
+            padding: 0.5em;
+            margin: 0;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .weaponTable th {
+            background-color: rgb(225, 225, 230);
+            font-weight: normal;
+            vertical-align: bottom;
+        }
+
+        .weaponTable .name {
+            width: 14em;
+        }
+
+        .weaponTable .number {
+            width: 1.5em;
+            text-align: right;
+        }
+
+        .weaponTable .notes {
+            width: 8em;
+            text-align: left;
+        }
+
+    </style>
+
+Armor has two important stats; defense, which increases your chance to avoid damage due to a glancing blow, and damage absorption that reduces the kinetic value of damage. These values are for hand to hand/weapon attacks; reduce damage absorption is halved vs modern gunfire.
+
+Other common material modifiers: 
+
+* Stone weapons: mail is +1 vs. stone weapons; plate is +2. 
+* Bronze: Steel plate and mail is +1 vs. bronze weapons; bronze plate is -1 vs. steel weapons
+
+<table class="weaponTable" cellpadding="0" border="0" cellspacing="0" style="width: 50%">
+<thead>
+<tr><th class="name">Name<th>Damage <br />Absorption<th>Defense<th>Kg<th class="notes">Notes</tr>
+</thead>
+<tbody>
+<tr>
+<td class="name">Light Leather
+<td>1
+<td>0
+<td>2
+<td></tr>
+<tr>
+<td class="name">Boiled Leather
+<td>2
+<td>0
+<td>5
+<td></tr>
+<tr>
+<td class="name">Studded Leather
+<td>1
+<td>1
+<td>7
+<td></tr>
+<tr>
+<td class="name">Fur
+<td>1
+<td>1
+<td>9
+<td></tr>
+<tr>
+<td class="name">Light Mail
+<td>3
+<td>1
+<td>10
+<td class="notes">2/0 vs. Penetration 2 weapons
+</tr>
+<tr>
+<td class="name">Heavy Mail
+<td>3
+<td>2
+<td>12
+<td class="notes">3/1 vs. Penetration 1 weapons
+</tr>
+<tr>
+<td class="name">Segmented Plate
+<td>6
+<td>2
+<td>18
+<td class="notes">Roman, Japanese armor; equals light mail from the rear</tr>
+<tr>
+<td class="name">Medium Plate
+<td>6
+<td>3
+<td>21
+<td class="notes">Equals heavy mail from the rear</tr>
+<tr>
+<td class="name">Heavy Plate
+<td>7
+<td>3
+<td class="notes">26
+<td class="notes">Equals Segmented Plate from the rear</tr>
+</tbody>
+        </table>

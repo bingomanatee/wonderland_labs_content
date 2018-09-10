@@ -1,0 +1,12 @@
+{
+    "file_name": "apiary",
+    "title": "The Apiary",
+    "intro": "The central sandbox of Hive-MVC",
+    "revised": "2013-07-06 06:47",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "hive_mvc",
+    "on_folder_homepage": true,
+    "folder_homepage_weight": 4
+}

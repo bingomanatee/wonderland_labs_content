@@ -1,0 +1,17 @@
+{
+    "file_name": "intro",
+    "title": "SUITS: the Card based RPG",
+    "intro": "A roleplaying game based on cards",
+    "revised": "2015-01-15 10:50",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "suits",
+    "on_folder_homepage": true,
+    "folder_homepage_weight": -100,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

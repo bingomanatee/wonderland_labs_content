@@ -1,0 +1,122 @@
+I've been wrestling with damage/hit point systems (mainly in my head) and I think part of the problem is my decisin making process is spinning in circles because my thoughts are not written down. so:
+
+## Problems with the basic hit point system. 
+
+I have two problems with the "Dead or Alive" hit point system that is prevalent in both RPG and video games. 
+
+* It doesn't reflect reality
+* It doesn't reflect movie/comic book reality
+* It doesn't alter player behavior based on assessed risk
+
+When your hit point trough going from 1 to zero is just as fatal when it is done with a tossed beer mug as with a refrigerator falling on you, then the scale of your opponent is less, or more, of a consideration in many cases. 
+
+Plus, it makes boxing matches and barroom brawls as potentially fatal as gunfights. 
+
+Lastly, not every weapon has the same proportionality of lethality. A baseball bat, for instance, has the same kinetic impact as a small caliber bullet, but the bullets narrow focus converts more of its kinetic energy to lethal penetration. The same effect is true to some extent for arrows, spears and swords. 
+
+## Goals of the SUITS system
+
+The basic thrust is this:
+
+* Have a system which records kinetic/short term damage -- **stun** -- and injury "deep" **damage** separately
+* Have larger attacks do more damage, either by 
+  * having larger attacks do more damage 
+  * "capping" stun damage and converting large amounts of kinetic impact to damage 
+  * having a max stun capacity for accumulated stun past which all kinetic damage converts to damage
+* Have weapon types have a greater ratio of damage to stun based on penetration rating
+
+The three fundamental effects that are desired are this:
+
+1. gradual weak attacks wear down targets but cause them to pass out; hopefully becoming less effective in the process
+2. single large attacks cause lethal damage causing targets to pass out and begin dying. 
+3. high penetration weapons cause more lethal damage compared to similar kinetic attacks than blunt weapons
+
+## Inputs
+
+there are several inputs to the calculation of the effect of an individual blow:
+
+### Weapon Strength
+
+The weapon strength for a hand weapon is based on the leverage of a weapon (that multiplies the user strength) and a fixed bonus based on the weapon's head; 
+
+#### Leverage 
+
+Leverage is a multiplier between 50% and 150%. as a rule, leverage is:
+
+* 50% for hand weapons/unarmed fighting (knives)
+* 75% for short one-handed weapons 1'/300cm (shortswords) and thrust weapons (spears)
+* 100% for medium one-handed weapons  2'/600cm (swords)
+* 125% for large two-handed weapons 3'/1m (war axes/mauls)
+
+#### Damage Bonus
+
+There is a significant difference between a baseball bat and a sword; this is reflected in a damage bonus/modifier based on weapon weight and focus (smaller area of impact == greater damage)
+
+* -1 for unarmed fighting
+* 0 for wooden clubs and staves
+* +1 for swords
+* +2 for warhammers and spears
+
+As a note, heavier weapons that do more damage often have windup/cooldown periods in which they cannot attack, so they do more damage but attack less often.
+
+#### Net Effect
+
+The range of damage from leverage is
+
+* 2 - 4 for unarmed combat or knife fights
+* 5 - 7 for swordfights
+* 6 - 10 for one handed weapons (Axes and mauls)
+* 7 - 12 for two handed heavy weapons (war axes and maces)
+
+*revision note*: the offensive damage is significantly underpowered for the range of armor. may boost leverage significantly. Alternately, do not include target in defensive ranking, just use it to scale damage effect.
+
+### Armor Defense
+
+Armor has three defensive traits: 
+
+1. rigid armor **absorbs** some kinetic input completely
+2. soft armor **disperses** some kinetic damage around the focus of impact, reducing the focused effect of bladed and piercing weapons to penetrate deeply into the body by spreading the force across a larger area
+3. thick armor reflects some attacks completely, increasing your defensive capacity 
+
+Your basic defense is your body + armor's dispersion
+
+* 4 - 6 for unarmored fighters with normal strength(Body 4-5)
+* 6 - 9 for lightly armored fighters (Body 4-5, armor 2-4)
+* 10- 12 for heavily armored professional fighters (body 5-6, armor 4-6)
+
+## Determining effect from power and toughness
+
+The interaction of offensive power (weapon kinetic energy), penetration and toughness (defensive armor and body) 
+
+### Option A: the GURPS model
+
+this model is common amongst a lot of RPGs. 
+
+1. Damage is random in the range of 1..weapon power
+2. Armor is fixed and subtracts from the resulting kinetic energy
+3. Penetration multiplies by the effective damage
+4. the effect of the net damage is scaled by the defenders' Body
+
+Dispersion being new to this equation opens the question - should it precede or follow penetration scaling? I'm thinking follow (3.1) at this point. 
+
+### Option B: a contest model
+My problems with this model is that armor is rarely so consistent as to be fairly represented as a constant; my thinking is that armor should range from 0..Dispersion. 
+Also both damage and dispersion should be relatively constant
+
+### Option C: Hybrid contest 
+
+This option uses the action/contest to determine the power of the attack/defense on this theory: 
+
+Your attack skill has a range of 1.. N; that is if your rank in a weapon skill is 7, you can use a card from A(1) to 7 for your attack. The higher the attack is, the lower your power will be. 
+
+The simplest tradeoff is Power = Max Power * (Max Skill - Card + 1)/(Max Skill + 1). 
+
+The catch is, the higher your card is, the higher the chance of getting a successful hit. 
+
+Say you have a power of 10 and a skill of 7. You have two possible cards to play for your attack: a 4 and a 6. 
+
+If you play a 4 (and your target doesn't defend successfully) your power will be 10 * (7 - 4 + 1)/(7 + 1) = 10 * 4/8 = 5. 
+
+Alternately if you play a 2, ( " " ) your power will be 10 * (7 - 2 + 1)/7 + 1) = 10 * 6/8 = 7.5, rounded to 8. 
+
+This means, for instance, that even people with skills so high that they can never draw a card within the top of their skill range get a payoff from their huge skill rank.

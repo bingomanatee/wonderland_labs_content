@@ -1,0 +1,9 @@
+There is a timeout for each ?[action script handler](action_scripts) that will pre-emptively return an error if an action takes too long. 
+
+Actions can take too long for any of many reasons: 
+
+1. The action was badly scripted and its handler ended without calling the callback
+2. A long task legitimately needs extra time to accomplish its activity, such as writing or searching a long file. 
+3. An external process, such as a network or a database, fails badly/loops
+
+If any of these situations occur an error will be sent back to the response.

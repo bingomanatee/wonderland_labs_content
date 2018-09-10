@@ -1,0 +1,1 @@
+You generally have more and bulkier data in your source than you do in your geoSphere.

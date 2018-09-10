@@ -1,0 +1,12 @@
+{
+    "file_name": "angular_and_require",
+    "title": "Angular and Require.js",
+    "intro": "You can use Angular with Require -- but be prepared for some \"Inception Math\"",
+    "revised": "2015-09-04 06:53",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "angular",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

@@ -1,0 +1,17 @@
+{
+    "file_name": "stack_combat",
+    "title": "Stack Combat",
+    "intro": "Stack combat is a conflict system that uses buffered actions and a single action/ability stack.",
+    "revised": "2015-04-27 04:57",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "suits",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

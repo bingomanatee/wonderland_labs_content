@@ -1,0 +1,17 @@
+{
+    "file_name": "datahero_rebuild",
+    "title": "Datahero Blog Rebuild",
+    "intro": "Rebuilding a basic blog for readability and enhanced interest",
+    "revised": "2015-02-17 08:53",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "design",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

@@ -1,0 +1,23 @@
+The level of detail of a given ?[Planet](planet) is an integer.
+
+Detail 0 is the most detailed level of data, and the highest level of detail is the one with 12 points.
+
+This means that for a vertex at a given level of detail N, it will have one or two parents at level of detail N - 1 (if N > 0) and (if N < max level of detail) 1..6 child vertices at level of detail N + 1. 
+
+Level of detail is derived from ?[Sectors] which represent faces at a given level of detail created during tessellation. Each sector is a record of a level of detail and three vertices. So when preparing ?[Networks](networks), sectors are records of which points exist at that level of detail, and which ?[neighbors](neighbors) those points have, at that level of detail.
+
+````
+depth vertices   %increase    area (km^2)  Diameter/avg. dist to neighbor
+0        12                  42,506,000    7,357
+1        42        350%      12,144,571    3,932
+2       162        386%       3,148,593    2,002
+3       642        396%         794,505    1,006
+4      2562        399%         199,091      503
+5     10242        400%          49,802      252
+6     40962        400%          12,452      126
+7    163842        400%           3,113       63
+````
+
+Each level of detail increases the number of vertices by a factor of four -- essentially exponential growth. 
+
+Most reasonable simulation times are <= detail 5.

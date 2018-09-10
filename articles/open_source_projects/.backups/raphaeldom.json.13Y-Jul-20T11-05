@@ -1,0 +1,17 @@
+{
+    "file_name": "raphaeldom",
+    "title": "Raphael DOM",
+    "intro": "Using percentage based measurements in Raphael",
+    "revised": "2013-07-20 11:05",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "open_source_projects",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

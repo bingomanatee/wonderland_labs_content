@@ -1,0 +1,17 @@
+{
+    "file_name": "better_objects",
+    "title": "Better Objects for Javascript",
+    "intro": "There is a lot of things that every object should do in Javascript.",
+    "revised": "2016-02-16 11:32",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "javascript",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

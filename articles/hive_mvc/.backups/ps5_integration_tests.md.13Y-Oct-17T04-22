@@ -1,0 +1,331 @@
+Integration tests via selenium can be run via webDriver and selenium. 
+
+Here are the integration tests for basic navigaation around the site as it exists now: 
+
+#### nav_tests.js
+
+``` javsacript
+
+var _ = require('underscore');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
+var tap = require('tap');
+var wd = require('wd');
+var utils = require('./lib/utils');
+
+tap.test('navigation', {timeout: 1000 * 200, skip: false }, function (suite) {
+
+    suite.test('home page', {timeout: 1000 * 100, skip: false }, function (hp_test) {
+        var browser = wd.remote();
+
+        function _abort(err) {
+            browser.quit(function () {
+                if (err) {
+                    console.log('error: ', err);
+                    hp_test.error(err);
+                }
+                hp_test.end();
+            });
+        }
+
+        browser.init({
+            browserName: 'chrome', tags: ["examples"], name: "navigation"
+        }, function () {
+            browser.get("http://passive-agressive-1248.herokuapp.com/", function () {
+                setTimeout(function () {
+                    browser.title(function (err, title) {
+                        console.log('result of title: %s, %s', err, title);
+                        hp_test.equal(title, 'Passive Aggressive 1248', 'title is equal');
+
+                        utils.visible(browser, 'button.all-locations')
+                            .then(function (visible) {
+                                hp_test.ok(!visible, 'all locations button is not yet visible')
+                            }, _abort)
+                            .then(function () {
+                                return utils.visible(browser, 'button.portlandor')
+                            })
+                            .then(function (visible) {
+                                hp_test.ok(visible, 'Portland button is visible');
+                            }, _abort)
+                            .then(function () {
+                                return utils.visible(browser, 'button.nyc')
+                            })
+                            .then(function (visible2) {
+                                hp_test.ok(visible2, 'New York button is visible');
+                            }, _abort)
+                            .then(function () {
+                                return  utils.click(browser, 'button.portlandor')
+                            })
+                            .then(function () {
+                                return  utils.visible(browser, 'button.nyc');
+                            }, _abort)
+                            .then(function (visible3) {
+                                hp_test.ok(!visible3, 'NY button no longoer visible');
+                            }, _abort)
+                            .then(function () {
+                                return  utils.visible(browser, 'button.all-locations')
+                            })
+                            .then(function (visible) {
+                                hp_test.ok(visible, 'all locations button is now visible')
+                            }, _abort)
+                            .then(function () {
+                                return  utils.click(browser, 'button.all-locations')
+                            })
+                            .then(function (visible4) {
+                                hp_test.ok(!visible4, 'New York button is not visible finally');
+                            }, _abort)
+                            .then(function () {
+                                browser.quit(function () {
+                                    hp_test.end();
+                                });
+                            })
+                    });
+                }, 3000); // give Angular some time to format template
+            });
+        });
+    });
+
+    suite.test('get movies', {timeout: 1000 * 100, skip: false }, function (movie_test) {
+
+        var browser = wd.remote();
+
+        function _abort(err) {
+            browser.quit(function () {
+                if (err) {
+                    movie_test.error(err);
+                }
+                movie_test.end();
+            });
+        }
+
+        browser.init({
+            browserName: 'chrome', tags: ["examples"], name: "navigation"
+        }, function () {
+            browser.get("http://passive-agressive-1248.herokuapp.com/", function () {
+                setTimeout(function () {
+                    utils.visible(browser, 'button.all-locations')
+                        .then(function (visible) {
+                            movie_test.ok(!visible, 'all locations button is not yet visible')
+                        }, _abort)
+                        .then(function () {
+                            return utils.visible(browser, 'button.portlandor')
+                        })
+                        .then(function (visible) {
+                            movie_test.ok(visible, 'Portland button is visible');
+                        }, _abort)
+                        .then(function () {
+                            return  utils.click(browser, 'button.portlandor')
+                        })
+                        .then(function () {
+                            return  utils.click(browser, 'button.event-movie')
+                        })
+                        .then(function () {
+                            setTimeout(function () {
+                                var css = '#paEventsCtrl h1';
+                                utils.getText(browser, css)
+                                    .then(function (text) {
+                                        movie_test.equal(text, 'Movies in zip Portland, OR', 'found event view title');
+                                        _abort();
+                                    }, _abort);
+
+                            }, 4000);
+                        });
+                }, 3000);
+            });
+        });
+    });
+
+    suite.end();
+
+});
+
+````
+
+These tests use the TAP framework and the chrome drivers for Selenium Webdriver to test the site on Node using Chrome, Selenium, and the `wd` module. 
+
+They use a `utils` library that is basically a promise-reinterpretation of the webdriver library. In most cases every operation in webdriver is multi-stage: 
+
+1. get an element
+2. test that element against various conditions (visible) or 
+3. operate on that element (click)
+4. catch the many errors what be emitted. 
+
+Creating your own wrappers around the webdriver multi-stage operations is mandatory for clean tests. As a bonus I hook the promise `q` library into the process to allow use of the `.then` construct to serialize the activity.
+
+#### utils.js
+
+``` javascript
+var Q = require('q');
+var util = require('util');
+var _ = require('underscore');
+var _DEBUG = false;
+
+var DEFAULT_WAIT_TIME = 800;
+
+var utils = {
+
+    click: function (browser, selector, done) {
+
+        if (!done) {
+            var deferred = Q.defer();
+            utils.getCSS(browser, selector).then(function (el) {
+                browser.clickElement(el, function () {
+                    deferred.resolve();
+                });
+            }, deferred.reject);
+            return deferred.promise;
+        } else {
+            utils.getCSS(browser, selector, function (err, el) {
+                if (err) {
+                    done(err);
+                } else if (typeof el == 'object') {
+                    browser.clickElement(el, done);
+                } else {
+                    done(new Error('cannot find ' + selector))
+                }
+            });
+        }
+    },
+
+    /**
+     * determines if an element is visible (and by implication, exists).
+     *
+     * Note -- this method doesn't actually throw errors; if element is not present, returns false.
+     *
+     * @param browser {webdriver}
+     * @param selector {string}
+     * @param timeout {number}
+     * @param done {function | null}
+     * @returns {promise|*|Q.promise}
+     *
+     */
+
+    visible: function (browser, selector, timeout, done) {
+        if (_.isFunction(timeout)) {
+            done = timeout;
+            timeout = 0;
+        }
+
+        if (!timeout) {
+            timeout = 0;
+        }
+
+        if (done && _.isFunction(done)) {
+            browser.waitForElementByCssSelector(selector, timeout, function () {
+                browser.elementByCssIfExists(selector, function (err, element) {
+                    if (err) {
+                        done(null, false);
+                    } else if (element) {
+                        browser.isVisible(element, done);
+                    } else {
+                        done(null, false);
+                    }
+                });
+            });
+        } else {
+            var deferred = Q.defer();
+
+            browser.waitForElementByCssSelector(selector, timeout, function () {
+                browser.elementByCssSelectorIfExists(selector, function (err, element) {
+                    if (_DEBUG)  console.log('visible.elementByCssIfExists %s result: %s, %s', selector, err, util.inspect(element));
+                    if (err) {
+                        deferred.resolve(false);
+                    } else if (typeof element == 'object') {
+                        browser.isVisible(element, function (err, visible) {
+                            if (err) {
+                                deferred.resolve(false);
+                            } else {
+                                deferred.resolve(visible);
+                            }
+                        })
+                    } else {
+                        deferred.resolve(false);
+                    }
+                });
+
+            });
+
+            return deferred.promise;
+        }
+    },
+
+    getText: function(browser, selector, timeout, done){
+        if (_.isFunction(timeout)) {
+            done = timeout;
+            timeout = DEFAULT_WAIT_TIME;
+        }
+
+        if (!timeout) {
+            timeout = DEFAULT_WAIT_TIME;
+        }
+        if (done){
+            utils.getCSS(browser, selector,timeout, function(err, element){
+                if (err){
+                    done(err);
+                } else {
+                    browser.text(element, done);
+                }
+            });
+        } else {
+            var derferred = Q.defer();
+
+            utils.getCSS(browser, selector, timeout)
+                .then(function(element){
+                    browser.text(element, function(err, text){
+                        if (err){
+                            derferred.reject(err);
+                        } else {
+                            derferred.resolve(text);
+                        }
+                    })
+                }, function(err){
+                    derferred.reject(err);
+                });
+
+            return derferred.promise;
+        }
+    },
+
+    getCSS: function (browser, selector, timeout, done) {
+        if (_.isFunction(timeout)) {
+            done = timeout;
+            timeout = DEFAULT_WAIT_TIME;
+        }
+
+        if (!timeout) {
+            timeout = DEFAULT_WAIT_TIME;
+        }
+
+        if (done && _.isFunction(done)) {
+            browser.waitForElementByCssSelector(selector, timeout, function () {
+                browser.elementByCssSelectorIfExists(selector, done);
+            });
+        } else {
+            var deferred = Q.defer();
+
+            browser.waitForElementByCssSelector(selector, timeout, function () {
+                browser.elementByCssSelectorIfExists(selector, function (err, element) {
+                    if (_DEBUG)   console.log('getCSS %s result: %s, %s', selector, err, util.inspect(element));
+                    if (err) {
+                        deferred.reject(err);
+                    } else if (element) {
+                        deferred.resolve(element);
+                    } else {
+                        deferred.reject(new Error('getCSS cannot find element' + selector))
+                    }
+                });
+
+            });
+
+            return deferred.promise;
+        }
+    }
+
+};
+
+module.exports = utils;
+
+```
+
+These actions compress multi-stage activities into single-method calls, and optionally, return promises.

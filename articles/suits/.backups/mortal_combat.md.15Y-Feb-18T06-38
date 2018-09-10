@@ -1,0 +1,86 @@
+Due to the finality of combat, there are specific rules for dealing with it that override the basic contest rules. 
+
+Mortal combat has more specific rules regarding initiative.
+
+## Stamina
+
+Each character in combat gets a deck of three cards that represent their current stamina. These cards may be played at any point instead of drawing a card. At no point can your stamina exceed three cards; when it does you may choose a card to discard from your hand. 
+
+## Rounds
+
+On the first round (or, the first round a character enters combat) you can place a card from your hand face down as your initiative marker. When all cards are placed, flip over the cards over. 
+
+If the card is below your movement rate, turn it sideways, to indicate you will act in the second phase.
+
+Characters act in descending order of their cards; then, those with sideways cards act in descending order. 
+
+In the event of a tie, act in order of suit: **heart**, **diamond**, **club**, **spade**. 
+
+Rounds represent about two seconds of real world time.
+
+### Actions
+
+In your turn you can do one of the following tasks:
+
+* **Attack**: choose an enemy character to target and attack
+* **Revive**: attempt to replenish your Will pool with a successful contest of your Will v. all accumulated damage
+* **Assist**: give one of your cards to an adjacent ally
+* **Windup/Ready**: prepare a weapon for use (See weapons tables for details)
+* **Move**: travel your full move. 
+* **Buff**: put a card aside to buff your next action
+* **Misc**: any other activity. 
+
+### Attacking: 
+
+Attacking a character is a contest of your offensive Speed versus your targets' defensive speed. 
+
+
+### State and Damage:
+
+Everyone in combat has a state; the possible states are:
+
+<table cellpadding=4 cellspacing=0 border=1>
+<tr><th>State</th><th>Effect</th></tr>
+<tr><td>Fresh</td><td>Act normally</td>
+<tr><td>Wounded</td><td>All Skills are at 50% (min -1)</td></tr>
+<tr><td>Crippled</td><td>All Movement, Attributes (including manual weapon Strength) are at 50% (min -1)*; Will check every round or pass out</td><tr>
+<tr><td>Mortal</td><td>Automatically pass out; Body check every two rounds or die</td></tr>
+<tr><td>Dead</td><td>Do not pass "Go".</td></tr>
+</table>
+
+&ast; does not affect toughness
+
+Once you are hit, you engage in a contest of Strength vs. the targets' Toughness. The margin of victory determines whether the target descends to a lower state. 
+
+#### Strength 
+
+The net weapons' power; either fixed (as for a gun) or computed from Body. 
+
+#### Toughness
+
+Your net damage resistance; generally speaking your Body + Armor. 
+
+#### Margin of Victory
+
+The margin of victory is a product of the contest of Strength v/ Toughness
+
+<table cellpadding=4 cellspacing=0 border=1>
+<thead><tr><th>Attackers' card</th>
+<th>Defenders' card</th><th>Margin</th></tr>
+<tr>
+<td>Above their Strength</td>
+<td>Above their Toughness</td>
+<td>1/2 Attackers' Strength</td></tr>
+<tr>
+<td>Within their Strength</td>
+<td>Above their Toughness</td>
+<td>Attackers' card value</td></tr>
+<tr>
+<td>Above their Strength</td>
+<td>Within their Toughness</td>
+<td>1/2 Attackers' Strength - Defenders' Card</td></tr>
+<tr>
+<td>Within their Strength</td>
+<td>Within their Toughness</td>
+<td>Attackers' card value - Defenders' card</td></tr>
+</table>

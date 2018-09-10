@@ -1,0 +1,17 @@
+{
+    "file_name": "the_myth_of_easy",
+    "title": "Angular, Backbone and the myth of easy",
+    "intro": "Angular is hard; harder than Backbone and jQuery. But it is not needlessly hard and it does shine a light on the myth of \"Easy\" frameworks",
+    "revised": "2015-02-09 05:06",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "javascript",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

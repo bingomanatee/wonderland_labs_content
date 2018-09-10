@@ -1,0 +1,60 @@
+I've been wrestling with damage/hit point systems (mainly in my head) and I think part of the problem is my decisin making process is spinning in circles because my thoughts are not written down. so:
+
+## Problems with the basic hit point system. 
+
+I have two problems with the "Dead or Alive" hit point system that is prevalent in both RPG and video games. 
+
+* It doesn't reflect reality
+* It doesn't reflect movie/comic book reality
+* It doesn't alter player behavior based on assessed risk
+
+When your hit point trough going from 1 to zero is just as fatal when it is done with a tossed beer mug as with a refrigerator falling on you, then the scale of your opponent is less, or more, of a consideration in many cases. 
+
+Plus, it makes boxing matches and barroom brawls as potentially fatal as gunfights. 
+
+Lastly, not every weapon has the same proportionality of lethality. A baseball bat, for instance, has the same kinetic impact as a small caliber bullet, but the bullets narrow focus converts more of its kinetic energy to lethal penetration. The same effect is true to some extent for arrows, spears and swords. 
+
+## Goals of the SUITS system
+
+The basic thrust is this:
+
+* Have a system which records kinetic/short term damage -- **stun** -- and injury "deep" **damage** separately
+* Have larger attacks do more damage, either by 
+  * having larger attacks do more damage 
+  * "capping" stun damage and converting large amounts of kinetic impact to damage 
+  * having a max stun capacity for accumulated stun past which all kinetic damage converts to damage
+* Have weapon types have a greater ratio of damage to stun based on penetration rating
+
+The three fundamental effects that are desired are this:
+
+1. gradual weak attacks wear down targets but cause them to pass out; hopefully becoming less effective in the process
+2. single large attacks cause lethal damage causing targets to pass out and begin dying. 
+3. high penetration weapons cause more lethal damage compared to similar kinetic attacks than blunt weapons
+
+## Inputs
+
+there are several inputs to the calculation of the effect of an individual blow:
+
+### Weapon Strength
+
+The weapon strength for a hand weapon is based on the leverage of a weapon (that multiplies the user strength) and a fixed bonus based on the weapon's head; 
+
+#### Leverage 
+
+Leverage is a multiplier between 50% and 150%. as a rule, leverage is:
+
+* 50% for hand weapons/unarmed fighting (knives)
+* 75% for short one-handed weapons 1'/300cm (shortswords) and thrust weapons (spears)
+* 100% for medium one-handed weapons  2'/600cm (swords)
+* 125% for large two-handed weapons 3'/1m (war axes/mauls)
+
+#### Damage Bonus
+
+There is a significant difference between a baseball bat and a sword; this is reflected in a damage bonus/modifier based on weapon weight and focus (smaller area of impact == greater damage)
+
+* -1 for unarmed fighting
+* 0 for wooden clubs and staves
+* +1 for swords
+* +2 for warhammers and spears
+
+As a note, heavier weapons that do more damage often have windup/cooldown periods in which they cannot attack, so they do more damage but attack less often.

@@ -1,0 +1,125 @@
+Due to the finality of combat, there are specific rules for dealing with it that override the basic contest rules. 
+
+Mortal combat has more specific rules regarding initiative.
+
+## Stamina
+
+Each character in combat gets a deck of three cards that represent their current stamina. These cards may be played at any point instead of drawing a card. At no point can your stamina exceed three cards; when it does you may choose a card to discard from your hand. 
+
+## Rounds
+
+On the first round (or, the first round a character enters combat) you can place a card from your hand face down as your initiative marker. When all cards are placed, flip over the cards over. 
+
+If the card is below your movement rate, turn it sideways, to indicate you will act in the second phase.
+
+Characters act in descending order of their cards; then, those with sideways cards act in descending order. 
+
+In the event of a tie, act in order of suit: **heart**, **diamond**, **club**, **spade**. 
+
+Rounds represent about two seconds of real world time.
+
+### Actions
+
+In your turn you can do one of the following tasks:
+
+* **Attack**: choose an enemy character to target and attack
+* **Revive**: attempt to shake off the effects of 
+* **Windup/Ready**: prepare a weapon for use (See weapons tables for details)
+* **Move**: travel your full move. 
+* **Misc**: any other activity. 
+
+### Attacking: 
+
+Attacking a character is a contest of your offensive Speed versus your targets' defensive speed. 
+
+### State and Damage:
+
+Everyone in combat has a state; the possible states are:
+
+<table cellpadding=4 cellspacing=0 border=1>
+<tr>
+<th>State</th>
+<th>Effect</th>
+</tr>
+<tr>
+<td>Fresh</td>
+<td>Act normally</td>
+</tr>
+<tr>
+<td>Fading</td>
+<td>Take an extra turn to wind up before acting
+</tr>
+<tr>
+<td>Wounded</td>
+<td>All Skills are at 50% (min -1)</td>
+</tr>
+<tr>
+<td>Crippled</td>
+<td>All Movement, Attributes (including manual weapon Strength) are at 50% (min -1)*; Will check every round or pass out</td>
+<tr>
+<tr><td>Mortal</td>
+<td>Automatically pass out; Body check every two rounds or die.</td>
+</tr>
+<tr><td>Dead</td>
+<td>Do not pass "Go".</td>
+</tr>
+</table>
+note you suffer ALL the effects of the states above and including your current state.
+&ast; does not affect toughness;
+
+Once you are hit, you engage in a contest of Strength vs. the targets' Toughness. The margin of victory determines whether the target descends to a lower state. 
+
+#### Strength 
+
+The net weapons' power; either fixed (as for a gun) or computed from Body. 
+
+#### Toughness
+
+Your net damage resistance; generally speaking your Body + Armor. 
+
+#### Margin of Victory
+
+The margin of victory is a product of the contest of Strength v/ Toughness; however if you draw over your Strength(or toughness) your value in the contest is half your score (round up). 
+
+The effect depends on the margin of victory and the defenders' Body. 
+
+<table cellpadding=4 cellspacing=0 border=1 width="50%">
+<tr>
+<th>Margin</th>
+<th>Effect</th>
+</tr>
+<tr>
+<td> Less than (Body/2)</td>
+<td>1 Damage</td>
+</tr>
+<tr>
+<td>(Body/2)</td>
+<td>2 Damage</td>
+</tr>
+<tr>
+<td>Body</td>
+<td>State - 1&ast;</td>
+</tr>
+<tr>
+<td>(1 1/2 x Body) </td>
+<td> State -2</td>
+</tr>
+<tr>
+<td>(2 x body)</td>
+<td>State -3</td>
+</tr>
+<tr>
+<td>(3 x body)</td>
+<td>Death</td>
+</tr>
+</table>
+
+#### Damage
+
+Damage is minor injury that gradually wears you down; when you accumulate wounds equal to or greater than your Body you descend to the next state, and clear your wounds.
+
+#### Reviving
+
+You can instead of acting, attempt to revive; this will negate the *effects* of the current state. This does not actually heal you or change your state, just allows you to avoid the effect of the current state. 
+
+To revive, you must make a Will check, -1 per state

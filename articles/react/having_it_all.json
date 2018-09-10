@@ -1,0 +1,12 @@
+{
+    "file_name": "having_it_all",
+    "title": "Bottle.js: a DI microframework.",
+    "intro": "using Bottle.js to mimic angular's DI for development and testing",
+    "revised": "2016-07-14 01:55",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "react",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

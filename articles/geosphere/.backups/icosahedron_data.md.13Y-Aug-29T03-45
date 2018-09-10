@@ -1,0 +1,35 @@
+The icosahedron-data is the workhorse of the system: it processes and responds to messages on planetary state. 
+ 
+It is based on zeromq and the new Node 10.x cluster core module. Each ?[sector](sector) is processed in an independent thread. 
+
+There are two aspects to this module: 
+
+## Manager
+
+The manager is the central broadcaster of data and events to the sector workers. 
+
+#### send(sector, msg, data)
+
+sends a message to one sector (or all , if sector == 'all') in the form of a JSON block with two properties: type: (the message parameter) and value: (the data parameter). 
+
+#### listen(envelope, msg)
+
+receives data from clients. Data is in the same format as sent messages (above).
+
+#### ready_sectors(): int(0..20)
+
+the number of sector workers that have acknowledged as being ready to receive messages. 
+
+#### shut_down()
+
+send a kill command to all sectors; allows the clients time to wrap up their current activity. 
+
+### Manager Events
+
+#### `sectors::ready`
+
+fired when all sectors have responded as being ready to do work. 
+
+#### `sectors::shut down`
+
+fired when all sectors have acknowledged the shutdown command.

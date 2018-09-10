@@ -1,0 +1,3 @@
+I wanted to make a Bender helmet this weekend at the TechShop but apparently there is way too many hoops to getting in on short notice. So I went to a hardware store to inquire about a flexible metal surface I could bend into a helmet. They came up empty -- and then when I went home I realized that aluminum can had all the qualities I needed.
+
+The downside to building with aluminum can plates is that they aren't very amenable to sphericalizing; they can be bent like a cylinder but getting a dome out of them is a tough thing. Hopefully a rivet gun will force-form them well to the shape I want.

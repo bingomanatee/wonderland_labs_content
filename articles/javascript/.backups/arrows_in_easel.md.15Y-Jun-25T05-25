@@ -1,0 +1,51 @@
+Everything is harder than it looks. Take the humble arrow. Just a triangle on a box. How hard can it be?
+
+Well, unless you're a trig maschoist, very. Unless you have a kind framework like Easeljs. 
+
+<iframe width="100%" height="300" src="//jsfiddle.net/bingomanatee/vcdnckfx/embedded/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+The shape object has a few useful properties that this fiddle showcases: 
+
+1. You can move and rotate the shape which is the container for all the inner graphics tactical calls
+2. You can set the opacity (alpha) for the entire shape through a global property (even hiding it entirely)
+3. You can hook mouse events to the stage in a jQuery-like style. 
+4. You synchronize updates to the stage when you want, via stage.update()
+5. You can save previous drawing in a shape object so you don't have to re-call or re-compute every graphics step every frame. 
+
+## Drawing the Arrow
+
+You really don't want to have to figure out the trig for what an arrow is like when it is rotated. Better to just draw it oriented to the right and rotate it from the start to the end point. Fortunately the shape has all the hooks for this: 
+
+``` javascript
+
+
+                var start = lastItem.point;
+                var end = item.point;
+                var arrow = new createjs.Shape();
+                var arrowSize = _distance(start, end);
+                var arrowRotation = _angle(start, end);
+                arrow.graphics
+                        .s(_color())
+                        .f(_color())
+                        .mt(0, 0)
+                        .lt(0, LINE_RADIUS)
+                        .lt(arrowSize - ARROWHEAD_DEPTH, LINE_RADIUS)
+                        .lt(arrowSize - ARROWHEAD_DEPTH, ARROWHEAD_RADIUS)
+                        .lt(arrowSize, 0)
+                        .lt(arrowSize - ARROWHEAD_DEPTH, -ARROWHEAD_RADIUS)
+                        .lt(arrowSize - ARROWHEAD_DEPTH, -LINE_RADIUS)
+                        .lt(0, -LINE_RADIUS)
+                        .lt(0, 0)
+                        .es();
+                arrow.x = start.x;
+                arrow.y = start.y;
+                arrow.alpha = 1;
+                arrow.rotation = arrowRotation;
+
+```
+
+not shown are the classic two-point distance calculations and the (degree) rotation function. As you can see you can use comparatively simple orthogonal math to draw the arrow. (not done but probably needed for production is to compensate for very short arrows, such that the arrowhead is behind the start point.) Then the canonical arrow is spun towards the target point. 
+
+## The Creation Script 
+
+To make it somewhat interactive, I am letting the user click on the stage to set the from-to points of the arrow. They will be chained end-to-end:

@@ -1,0 +1,12 @@
+{
+    "file_name": "gate",
+    "title": "Gate: the missing async method",
+    "intro": "Handling indefinite delay with Gate",
+    "revised": "2013-08-08 03:44",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "javascript",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

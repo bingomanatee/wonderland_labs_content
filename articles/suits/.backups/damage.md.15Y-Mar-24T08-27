@@ -1,0 +1,19 @@
+Damage is broken into shock and injury. Shock is a temporary affect of impact that can be quickly shrugged off after combat is done. Injury is long term trauma that can be lethal. 
+
+## Effects of Injury
+
+If your injury exceeds your body, you must make a contest of Body v. (Injury - body) or collapse, mortally wounded. Once your injury exceeds twice your Body, you immediately collapse, mortally wounded and unconscious. This check must be made on the initial blow, and at the end of every round. 
+
+Taking a single blow of over your Body in injury is crippling; you are immediately disabled (1/2 to all skill, +1 windup to all weapons), an effect that lasts until all your wounds are healed. 
+
+### Mortal Injury
+
+When your injury exceeds your Body you require immediate care. Each round you are at this state, you must draw a card; if the card is red (see penetration for details) you take another point of Injury and must make a contest of Body v. (Injury - Body) every 10 minutes or die. Bleedout can be stopped with a successful EMT contest v. (Injury - Body). Injury over 2x Body requires a surgeon to stabilize. 
+
+## Effects of Shock
+
+When your shock exceeds your Will you must make a contest of Will v. (Shock - Will) or collapse unconscious. Also any shock above 2x Will is taken as injury. 
+
+## Recovering from Damage
+
+Shock recovers quickly (in minutes) and can even be recovered during combat. Injury must be healed by resting.

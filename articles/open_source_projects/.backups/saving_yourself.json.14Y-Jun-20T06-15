@@ -1,0 +1,12 @@
+{
+    "file_name": "saving_yourself",
+    "title": "Saving Your Work on Git",
+    "intro": "There is that uncomfortable state where you want to ensure you don't lose your work but the tests don't pass. What to do?",
+    "revised": "2014-06-20 06:15",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "open_source_projects",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

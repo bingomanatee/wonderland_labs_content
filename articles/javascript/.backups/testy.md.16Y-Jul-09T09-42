@@ -1,0 +1,7 @@
+I've been using a lot of test frameworks in various companies and Tap in my own work, and the more I do so, the more I come to appreciate Tap. Tap is a [protocol for testing](https://testanything.org/), and node tap is maintained by  [Isaac Z. Schlueter](http://blog.izs.me/), one of Node's founders. 
+
+All test frameworks work -- to the promises they make. However testing is a very specific process and how it works is just as important as that it works. 
+
+All the test frameworks other than Tap are context-centric; that is, they assume the test framework has booted up and placed constructs in scope ('it', 'describe', etc. ). This means you cannot directly run a test file as a node run; you must run a test runner and target the test file. 
+
+With Tap tests are totally self contained; you can simply call 'node './mytestfile.js'. You can step through it,

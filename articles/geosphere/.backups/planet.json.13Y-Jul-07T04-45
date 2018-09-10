@@ -1,0 +1,17 @@
+{
+    "file_name": "planet",
+    "title": "Planets",
+    "intro": "the core class for GeoSphere",
+    "revised": "2013-07-07 04:45",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

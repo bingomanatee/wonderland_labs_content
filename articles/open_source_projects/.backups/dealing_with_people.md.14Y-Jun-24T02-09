@@ -1,0 +1,67 @@
+Engineers are noted for their social failings. My favorite example of this is the "Three second pause" on Star Trek: the Next Generation. 
+
+Everytime an actor in Star Trek: TNG expresses an emotion that is in any way subtle, they literally freeze time for three seconds to allow the engineers in the audience time to perceive the emotion. 
+
+Given that, its a good idea to overcompensate when it comes with people. Because you can't kill them, even when it seems like a good idea. 
+
+## Nobody wants to know how the sausage is made. 
+
+Unless in an audience of peers, do not try to engage people on process. Describe the inputs and the result -- don't drag them behind the scenes unless there is absolutely no other way of communicating an issue. 
+
+## Avoid discussing time. 
+
+Estimates with time attached to them are thorny. Never volunteer a delivery date and especially never promise a delivery date on a subjective issue like, "How long will it take you to make the checkout process easy?" Because the answer is, really, "As long as I work here." You might be able to estimate a specific feature set, but you can't really promise that after a given period of time you work will be perceived in a particular light. 
+
+When you are in the position of giving a deadline be as pessimistic as possible. Any number of tangents can occur inbetween now and then and peoples shifting priorities will skew things. In the best case, winnow down expectations to short term achievables that can be done rapidly -- people are more impressed with five fast deliveries than one long one, even if the content is the same. 
+
+## When you feel like you are being double managed, take directives down in writing and get all parties talking with each other. 
+
+If you feel like you are swimming in a "sea of suggestions" avoid direct response -- in fact, in general it is good to avoid working with someone over your shoulder if at all possible. Make up a blocking priority if you have to and request the party writes down and documents their request. You'd be amazed how many half-hearted requests evaporate when the requestor is forced to open a ticket for their issues. 
+
+Ask for, or work up yourself, paper previews of anything visual. People are really good at "word drawing" unlikely things in the absence of visual confirmation. 
+
+## Always be willing to ask stupid questions. 
+
+You are much less likely to be thought poorly of for asking too many questions then you are for not understanding someone's intent. Ask them of people who you are smarter than, and especially ask them of people smarter than you. And don't ask them in such a way that they feel pressed towards answering in any particular manner. 
+
+## Don't feel like you have to do everything people ask you to do. 
+
+Its easy to get complacent and regard yourself in the way many regard you, as a production machine. If something feels poorly thought through, unnecessary, or wrong, put it off, think about it for a day and put your issues in writing. 
+
+## Never complain unless you have a better solution
+
+Most things are suboptimal. Its best to focus on things with practical solutions.
+
+## Everybody is in love with their own ideas
+
+Especially people who start companies. Don't become belligerent when people do not change their minds -- mind-changing is a rare phenomenon. Once someone has set on a direction, they are very rarely open to course correction. 
+
+If you feel someone is definitely wrong yet unwilling to listen to your suggestion, implement their idea, AND your own idea and put them side by side. And put extra effort into not half-assing their ideas as will be the natural trend. 
+
+## Your job is to make people money
+
+The job of every engineer is not to make things: it is to make money for their employer. If you want to do something creative, your own time is best put to those pursuits. There are very few industries in which the bottom line is not the primary concern -- though customer satisfaction is generally the shortest route to that bottom line, your own happiness is not a factor in this calculus. Especially, internal peoples' happiness is also not a factor, though it does affect your survival in a company and *your* ability to make money. 
+
+Always favor outward facing tasks over internal cruft; how your company and their products is/are perceived and valued is the only meaningful metric. 
+
+## Very little of your work will survive
+
+Be willing to accept that your work will get changed or tossed out -- its not a reflection of you. Very much of your work is just going to get you through a few weeks at best, maybe even a year or two on the outside. 
+
+People will flip on you constantly -- sometimes its because their requirements have changed, often its because the first set of spec simply wasn't thought through. You can reduce the amount of flipping by maximizing the amount of direct feedback you give people and providing pre-product docs and specs but you will never be able to make yourself walk a straight line. 
+
+Almost everyone is going to have post-delivery tweaks and sometimes even complete rejection of a fitting incarnation of their specifications, once they see it in the real world. Its not because they are stupid (or maybe not JUST because they are stupid) -- most people have no ability to visualize anything. 
+
+If you find yourself constantly doing and redoing things, do your best to produce cheap prototypes before doing expensive engineering. 
+
+## Do not take any advice on process from those ill-equipped to give it. 
+
+People read all sorts of trendy things about technology. You should to, of course; but when you find yourself being driven towards a technological path for what seems like no good reason, return the argument to the end product and get feedback in areas the person is qualified to give it -- what the customer needs, (internal or external), not HOW the product is to be delivered.
+
+Rather than directly arguing with them, simply ignore their advice. If they ever figure out what happened its not likely to be an issue -- unless you fuck up and expose the fact early on.
+
+## Do not fuck up
+
+Do whatever you can to avoid an engineering fuckup. Write tests, use other peoples code, avoid overengineering, and do smaller cycles. Human test your work as much as possible. Never let a manager attempt to push your work out past a test cycle. Its not his ass, its yours. 
+
+People almost never get fired for blowing deadlines. People do get fired for fucking up.

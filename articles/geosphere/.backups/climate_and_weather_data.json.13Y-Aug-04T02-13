@@ -1,0 +1,17 @@
+{
+    "file_name": "climate_and_weather_data",
+    "title": "Climate",
+    "intro": "Various environmental/terrain data source points",
+    "revised": "2013-08-04 02:13",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "geosphere",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

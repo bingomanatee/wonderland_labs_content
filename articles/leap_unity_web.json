@@ -1,0 +1,12 @@
+{
+    "file_name": "leap_unity_web",
+    "title": "Using the Leap Motion hardware with Unity/Web Player",
+    "intro": "The unity web player cannot communicate directly with the Leap Control hardware. It can however communicate with javascript, which CAN connect with the leap controller. Creating a bridge between these systems is fairly simple... if you know what you are doing.",
+    "revised": "2013-11-05 08:53",
+    "tags": [],
+    "on_homepage": true,
+    "hide": false,
+    "folder": "",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0
+}

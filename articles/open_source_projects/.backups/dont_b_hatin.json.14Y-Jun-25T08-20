@@ -1,0 +1,17 @@
+{
+    "file_name": "dont_b_hatin",
+    "title": "Don't be Hatin on the Twitter Bootstrap",
+    "intro": "People are starting to object to the Twitter Bootstrap -- The fault is not in our stars, but in ourselves.",
+    "revised": "2014-06-25 08:20",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "open_source_projects",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

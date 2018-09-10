@@ -1,0 +1,17 @@
+{
+    "file_name": "make_events_core",
+    "title": "Make Events Core in Javascript",
+    "intro": "Events are all over the place. Lets bring them under the tent.",
+    "revised": "2014-05-01 10:50",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "javascript",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

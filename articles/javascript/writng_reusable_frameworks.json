@@ -1,0 +1,17 @@
+{
+    "file_name": "writng_reusable_frameworks",
+    "title": "Writing Reusable JavaScript frameworks",
+    "intro": "There are a lot of systems for writing JS frameworks but not a lot of description of best practices and conventions",
+    "revised": "2014-03-23 05:02",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "javascript",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

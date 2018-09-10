@@ -1,0 +1,17 @@
+{
+    "file_name": "damage",
+    "title": "Damage and Shock",
+    "intro": "the effects of damage and shock",
+    "revised": "2015-01-22 01:52",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "suits",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "file_name": "flexbox",
+    "title": "Some Flexbox Examples",
+    "revised": "2015-05-18 09:01",
+    "tags": [],
+    "on_homepage": false,
+    "hide": false,
+    "folder": "design",
+    "on_folder_homepage": false,
+    "folder_homepage_weight": 0,
+    "author": {
+        "_id": "805008941",
+        "provider": "facebook",
+        "displayName": "Dave Edelhart"
+    }
+}

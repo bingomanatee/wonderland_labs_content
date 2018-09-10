@@ -1,0 +1,14 @@
+There are two basic coordinate systems underpinning most SVG/Canvas drawing tools:
+
+1. **absolute** -- that is, specifying pixel by pixel where you want your objects to go to.
+2. **transformational** defining a hierarchy of centers, transforms, rotates and scaling of target coordinates. 
+
+The web introduces a third set of coordinate systems in DOM: **percentage** coordinates; that is, each box's position, width and height can be defined as absolute or percentages of the container. I say "system" but in reality, the system is very "gappy" -- you can't easily center one object relative to another, for instance. 
+
+Percentage based calculus is very useful in many situation where you don't know the bounding objects' coordinate system. 
+
+RaphaelDOM overlays a coordinate system based on percentages over the Raphael SVG drawing system. 
+
+Here is an example of raphaelDOM in action: 
+
+<iframe width="100%" height="800" src="http://jsfiddle.net/bingomanatee/kD9Rf/embedded/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>

@@ -1,0 +1,82 @@
+There are a lot of variables when it comes to damage and shock:
+
+* The raw Power of the attack (Drives the Stun)
+* The Penetration rating of the attack (increases the chance of penetration)
+* The Effectiveness of the attack
+* The Effectiveness of the defense
+* The Defender's Armor
+
+This is a fairly long ride so stick with it....
+
+### 0. The contest of power 
+
+Before the damage is determined, the contestants perform a contest of skill. Each Contestant draws a card; their are three possible results: 
+
+1. A failure if you draw over your Rank
+2. A success if you draw under your Rank
+3. A major success if you draw under your Rank AND over 1/2 your skill (round down). 
+
+The attack connects if 
+
+1. The Attacker draws a Major Success and the defender does not draw a Major Success, or 
+2. The Attacker draws a Success and the defender fails or 
+3. Both the Attacker and Defender have the same kind of success (major or normal) and the attackers' card is higher. 
+
+## 1. The Kinetic Power of the attack
+
+Every weapon has a Potential Kinetic Power determined by leverage, weapon bonus, or machinery. 
+
+* If the Attacker succeeds, the true Kinetic Power of the attack equals 1/2 the PKP (round down).  
+* If the Attacker has a Major Success and the defender has a normal success (but the attack still connects), the Kinetic Power of the attack equals the PKP. 
+* If the Attacker has a Major Success and the defender fails, the Kinetic Power of the attack is 150% of the PKP (round up). 
+
+This value is the Effective Kinetic Power of the attack. 
+
+### 2. The Stopping Power of the Armor
+
+Every armor has an absorption rating. This Base Absorption is altered by the defender's success.  
+
+* If the defender fails absorption is half Base Absorption (round up). 
+* If the defender succeeds, Effective Absorption is Base Absorption
+* If the defender has a Major Success, Effective Absorption is twice Base Absorption, or 1/2 their Body, whichever is better. 
+
+### 3. Stun
+
+Subtract Effective Absorption from the Kinetic Power. The result is the **Pain** of the blow and is added to your **Stun** total. If you take Pain greater than your Will you are instantly knocked out. 
+
+### 3. Damage 
+
+The Potential Damage of the attack is the Pain + the Attackers' Penetration - the Defenders' Armor Dispersal. 
+
+* Ignore defenders' armor if the defender fails. 
+* If the Defender has a Major Success, Dispersal is twice their Armor Dispersal or 1/2 their Body, whichever is better.  
+
+Draw a card against the Potential Damage to determine the actual Damage; add that to the defenders' Wounds. Note, if you deliver actual Damage greater than the defenders' Wounds, the defender is instantly killed. 
+
+## Effect of Accumulated Stun
+
+If you accumulate Stun greater than your Willpower, you are *Dazed*; you cannot attack (or make any other action, talk, etc.) until you have recovered stun down to your Willpower or below. You can defend normally.
+
+If you accumulate Stun greater than your Willpower + Body, you pass out. 
+
+Every turn you have any Stun, at the end of your action, draw against your Willpower. 
+
+* If you succeed, you recover a point of Stun. 
+* If you have a Major Success, you recover two points. 
+* If you fail, you recover 1/2 a point of Stun. 
+
+If you do not act and are not successfully attacked for the entire turn, you recover an additional point of stun at the end of the turn. So, this is not possible until at least the next turn after you are first hit. 
+
+## Effects of Accumulated Damage
+
+If you accumulate damage above 1/2 your Body you are crippled; all your skills are halved (round down). 
+If you accumulate damage above your Body you are mortally wounded. Before your turn every round, draw a card;
+
+* If it is black, add a point of Stun; if it is above your Willpower, you pass out. 
+* If it is red, add a point of Damage; if it is above your Body, you collapse, dropping your weapon, and your defense is halved. 
+
+If you accumulate or bleed out damage above twice your body, you die. 
+
+## Emergency care
+
+You
