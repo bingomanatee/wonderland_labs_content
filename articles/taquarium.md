@@ -1,1 +1,3 @@
-M��j�������h���j�M��j������i��(�׫��ݕ��r�����j���+��iz��z{b��q��j��jǥ��k+(~X���aj������i�njYr��iy�h���e�m���v�ߡ�az��z��j�����ئ
+![Taquarium.png](/blog_image/Taquarium.png)
+
+http://wonderlandlabs.com/taquarium is an experiment in web canvas/easel. the rays of light that flicker are actually mapped to the highlights read off of the video image in real time.

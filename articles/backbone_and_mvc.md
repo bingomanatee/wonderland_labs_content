@@ -1,7 +1,18 @@
-"�jx���޲ا�جr�,���n��m�$n��jwZ��bq�b�yh�'u���
-+�)�j֜�jZ�,!z����h�'��(����h��jY^���u�b��-���{!i֝��.�Ȩ����&z��v����׫z���)�'!����h�+b�|��Z��^r��e�x�׬���u����^��^�8b���֧��b�v�=��v�	�b��p��޶��ץ��"�f�����mz�ږ�-��ZrF�秾*�g���Z��(��h�
-)z�(��h�)�{-��H���r�������]j֦�ץ�S(u�l�.��Z��ɷ���n�'Z��,�&�xLmz�ږg���l�.��ޭ�)�{"nW����v)�n�"��,�{^�X�zw���u�]j֧��azjzW%j���^�ǥ��6�Z�ʮ�ר~קm�mz��u�ey֬��Z��z{l��az�aj{-j؜r�ey�b�{��"��^���jب�����j)�^��߭�-���~�^zh���]j֭��y�m�f��֢��Z��(�y���ޭ�ij�^�zj�e�ƭ���zȠ��h����ږ\��֩�X�jب�Z �ȧ���u�lV'����{k�Y^��,�xV'�jƜ�{k�Y^�h���zib��t�B
-��ez���'��%����b����+r����,��
-�����v����n�Z �ȧz+az�eiǾ�+m��b�*'jYrm�h�"��^r��ez�ZrF��越��%�V��Ɯ�{k�Y^�W��)�۩�����y��z�ފ�'��aj�Z�߾i�'��%���jv�j�z�����r�ܺ�h��Z��aj�Z���z��q�h��^�Ƨv���Ƨvf�j�z���Ĩ�z޶�,��-��0z���
-+������'z)ڞ'^j[zv�����ޭ�eʚ�}��
-+��Z��
+I had an interesting discussion about backbone and application logic. I'd been working at a company where the logic for control flow was all embedded into the **view**. I had a discussion with someone during a code review in which the supposition was that the controlling code should be in the **model**. This wasn't an option at PersonalCapital, where the model was in many ways external to the Backbone environment. 
+
+I have come to two  personal opinions that I have come to about data models:
+
+1. Models should largely be as stupid as possible. External methods should be responsible for adding business intelligence to model data, not the model classes themselves. 
+2. Data is quite often better modelled as update events rather than static collections.  View implementations can retain whatever fraction of the emitted data they need to maintain state. 
+
+so in my general pattern of application design I don't generally put application logic into models. 
+
+## Views as controllers
+
+Using a View as a controller might seem like odd MVC, 
+
+## Controllers as controllers
+
+But in reality, the classic MVC pattern doesn't put logic in either place -- it traditionally belongs in the controller. Backbone notoriously lacks a controller, leaving it up to you to define one; its not that hard -- a controller can be a generic object/custom class that has reference to models and views and manages events. 
+
+So in retrospect, if I were to work with Backbone in an ideal scenario, I'd generally prefer to work that way.
